@@ -11,6 +11,14 @@ public class Board {
     private boolean isArchived;
     private BoardVisibility visibility;
 
+    public Board() {}
+
+    public Board(String name, String description, List<CardList> cardList) {
+        this.name = name;
+        this.description = description;
+        this.cardList = cardList;
+    }
+
     public Board(String name, String description, List<CardList> cardList, List<Member> members,
                  boolean favoriteStatus, boolean isArchived, BoardVisibility visibility) {
         this.name = name;
