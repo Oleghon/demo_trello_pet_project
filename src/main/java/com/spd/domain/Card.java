@@ -10,6 +10,7 @@ public class Card {
     private LocalDateTime creationDate;
     private List<Member> assignedMembers;
     private List<Comment> comments;
+    private List<Label> labels;
     private Reminder reminder;
     private List<CheckList> checkList;
 
@@ -24,15 +25,16 @@ public class Card {
         this.assignedMembers = assignedMembers;
     }
 
-    public Card(String name, String description, boolean isArchived,
-                LocalDateTime creationDate, List<Member> assignedMembers,
-                List<Comment> comments, Reminder reminder, List<CheckList> checkList) {
+    public Card(String name, String description, boolean isArchived, LocalDateTime creationDate,
+                List<Member> assignedMembers, List<Comment> comments, List<Label> labels,
+                Reminder reminder, List<CheckList> checkList) {
         this.name = name;
         this.description = description;
         this.isArchived = isArchived;
         this.creationDate = creationDate;
         this.assignedMembers = assignedMembers;
         this.comments = comments;
+        this.labels = labels;
         this.reminder = reminder;
         this.checkList = checkList;
     }
@@ -83,6 +85,14 @@ public class Card {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public List<Label> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<Label> labels) {
+        this.labels = labels;
     }
 
     public Reminder getReminder() {
