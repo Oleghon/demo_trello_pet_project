@@ -1,4 +1,4 @@
-package com.spd.domain;
+package com.spd.trello.domain;
 
 import java.util.TimeZone;
 
