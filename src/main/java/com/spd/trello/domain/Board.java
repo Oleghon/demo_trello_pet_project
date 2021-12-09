@@ -7,8 +7,8 @@ public class Board {
     private String description;
     private List<CardList> cardList;
     private List<Member> members;
-    private boolean favoriteStatus;
-    private boolean isArchived;
+    private Boolean favorite;
+    private Boolean archived;
     private BoardVisibility visibility;
 
 }
