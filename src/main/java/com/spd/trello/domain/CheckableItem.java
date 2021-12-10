@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CheckableItem {
     private String name;
-    private Boolean check;
+    private Boolean check = false;
 }

@@ -9,6 +9,6 @@ import java.util.List;
 public class Comment {
     private Member member;
     private String text;
-    private LocalDateTime date;
+    private LocalDateTime date = LocalDateTime.now();
     private List<Attachment> attachments;
 }
