@@ -1,8 +1,10 @@
 package com.spd.trello.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class Label {
+@EqualsAndHashCode(callSuper = true)
+public class Label extends Domain {
     private String colorName;
 }

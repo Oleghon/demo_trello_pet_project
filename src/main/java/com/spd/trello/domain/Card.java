@@ -1,12 +1,17 @@
 package com.spd.trello.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Card extends CardTemplate{
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class Card extends Resource{
     private String name;
     private String description;
     private Boolean archived = false;
