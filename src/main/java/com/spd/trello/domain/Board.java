@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Board extends BoardTemplate{
+public class Board extends Resource{
     private String name;
     private String description;
     private List<CardList> cardLists = new ArrayList<>();
