@@ -11,7 +11,7 @@ public class CardService extends AbstractService<Card> {
     private List<Card> cards = new ArrayList<>();
 
     @Override
-    public Card create() {
+    public Card create(boolean addToList) {
         Card card = new Card();
         System.out.println("Input name of card:");
         card.setName(scanner.nextLine());

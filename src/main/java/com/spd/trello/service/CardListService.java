@@ -9,16 +9,18 @@ import java.util.Scanner;
 
 public class CardListService extends AbstractService<CardList> {
     private static Scanner scanner = new Scanner(System.in);
-    private List<CardList> cardLists = new ArrayList<>();
+    //  private List<CardList> cardLists = new ArrayList<>();
 
     @Override
-    public CardList create() {
+    public CardList create(boolean addToList) {
         CardList cardList = new CardList();
         cardList.setName(scanner.nextLine());
-        System.out.println("Do you want to add cards? Y/N");
-        if (scanner.next().equals("Y"))
-            cardList.setCards(addCards());
-        cardLists.add(cardList);
+        if (addToList == true) {
+            System.out.println("Do you want to add cards? Y/N");
+            if (scanner.next().equals("Y"))
+                cardList.setCards(addCards());
+            items.add(cardList);
+        }
         return cardList;
     }
 
@@ -27,7 +29,7 @@ public class CardListService extends AbstractService<CardList> {
         List<Card> cards = new ArrayList<>();
         int mark = 1;
         while (mark == 1) {
-            cards.add(cardService.create());
+            cards.add(cardService.create(true));
             System.out.println("If you want to add one more card press '1' else press '0' ");
             mark = scanner.nextInt();
         }
@@ -36,7 +38,7 @@ public class CardListService extends AbstractService<CardList> {
 
     @Override
     public CardList update(int index, CardList obj) {
-        CardList cardListForUpdate = cardLists.get(index);
+        CardList cardListForUpdate = items.get(index);
         cardListForUpdate.setName(obj.getName());
         return cardListForUpdate;
     }
