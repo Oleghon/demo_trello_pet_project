@@ -33,7 +33,7 @@ public class JdbcConfig {
         hikari.setJdbcUrl(properties.getProperty("jdbc.url"));
         hikari.setUsername(properties.getProperty("jdbc.username"));
         hikari.setPassword(properties.getProperty("jdbc.password"));
-
+        hikari.setMaximumPoolSize(Integer.parseInt(properties.getProperty("jdbc.connections")));
         return new HikariDataSource(hikari);
     }
 
