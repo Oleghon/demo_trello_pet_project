@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class Resource extends Domain {
-    private Member createdBy;
-    private Member updatedBy;
+    private String createdBy;
+    private String updatedBy;
     private LocalDateTime createdDate = LocalDateTime.now();
     private LocalDateTime updatedDate;
 }

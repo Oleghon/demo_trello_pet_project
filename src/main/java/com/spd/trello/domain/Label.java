@@ -5,6 +5,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Label extends Domain {
+public class Label extends Resource {
     private String colorName;
 }
