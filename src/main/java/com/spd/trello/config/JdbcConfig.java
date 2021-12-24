@@ -12,16 +12,19 @@ import java.util.Properties;
 
 public class JdbcConfig {
 
+   private static DataSource dataSource;
+
     {
-        Flyway flyway = createFlyway(createDataSource());
+        createDataSource();
+        Flyway flyway = createFlyway(dataSource);
         flyway.migrate();
     }
 
     public Connection getConnection() throws SQLException {
-        return createDataSource().getConnection();
+        return dataSource.getConnection();
     }
 
-    public DataSource createDataSource() {
+    public void createDataSource() {
         Properties properties = null;
         try {
             properties = loadProperties();
@@ -34,7 +37,7 @@ public class JdbcConfig {
         hikari.setUsername(properties.getProperty("jdbc.username"));
         hikari.setPassword(properties.getProperty("jdbc.password"));
         hikari.setMaximumPoolSize(Integer.parseInt(properties.getProperty("jdbc.connections")));
-        return new HikariDataSource(hikari);
+        dataSource = new HikariDataSource(hikari);
     }
 
     public Flyway createFlyway(DataSource dataSource) {
