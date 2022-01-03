@@ -57,7 +57,7 @@ public class MemberRepositoryImpl implements Repository<Member> {
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
-                resultSet.next();
+               while (resultSet.next())
                 foundMember = buildMember(resultSet);
             }
         } catch (SQLException e) {
@@ -66,7 +66,7 @@ public class MemberRepositoryImpl implements Repository<Member> {
         return foundMember;
     }
 
-    private Member buildMember(ResultSet resultSet) throws SQLException {
+    public Member buildMember(ResultSet resultSet) throws SQLException {
         Member member = new Member();
         member.setId(UUID.fromString(resultSet.getString("id")));
         member.setCreatedBy(resultSet.getString("created_by"));
