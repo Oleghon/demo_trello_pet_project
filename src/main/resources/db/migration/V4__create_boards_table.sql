@@ -7,5 +7,6 @@ CREATE TABLE boards(
     name VARCHAR(200) NOT NULL,
     description VARCHAR(200),
     archived BOOLEAN NOT NULL,
-    workcsace_id uuid NOT NULL CONSTRAINT board_workspace_id_fk REFERENCES workspaces(id)
+    visibility VARCHAR(100) NOT NULL,
+    workspace_id uuid NOT NULL CONSTRAINT board_workspace_id_fk REFERENCES workspaces(id)
 );

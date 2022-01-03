@@ -6,6 +6,5 @@ CREATE TABLE workspaces(
     updated_date TIMESTAMP without time zone,
     name VARCHAR(200) NOT NULL,
     description VARCHAR(200),
-    visibility VARCHAR(200) NOT NULL,
-    member_id uuid  NOT NULL CONSTRAINT workspace_member_id_fk REFERENCES members(id)
+    visibility VARCHAR(200) NOT NULL
 );
