@@ -14,6 +14,7 @@ import java.util.List;
 public class Card extends Resource{
     private String name;
     private String description;
+    private CardList cardList;
     private Boolean archived = false;
     private LocalDateTime creationDate = LocalDateTime.now();
     private List<Member> assignedMembers = new ArrayList<>();

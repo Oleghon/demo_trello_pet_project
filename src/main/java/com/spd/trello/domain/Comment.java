@@ -10,5 +10,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Comment extends Resource{
     private String text;
+    private Card card;
     private List<Attachment> attachments;
 }
