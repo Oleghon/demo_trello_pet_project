@@ -75,7 +75,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
     @Override
     public WorkSpace findById(UUID index) {
         WorkSpace foundSpace = null;
-        try (PreparedStatement statement = config.getConnection()
+        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("select * from workspaces where id = ?")) {
             statement.setObject(1, index);
             if (statement.execute()) {
@@ -141,7 +141,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
     @Override
     public List<WorkSpace> getObjects() {
         List<WorkSpace> workSpaces = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection()
+        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("select * FROM workspaces")) {
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
