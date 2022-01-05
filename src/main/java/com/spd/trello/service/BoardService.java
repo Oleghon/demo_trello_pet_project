@@ -1,50 +1,45 @@
 package com.spd.trello.service;
 
 import com.spd.trello.domain.Board;
-import com.spd.trello.domain.CardList;
+import com.spd.trello.repository.Repository;
+import com.spd.trello.repository.impl.BoardRepositoryImpl;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Scanner;
+import java.util.UUID;
 
 public class BoardService extends AbstractService<Board> {
-    private Scanner scanner = new Scanner(System.in);
 
-    @Override
-    public Board create(boolean addToList) {
-        Board board = new Board();
-        System.out.println("Input name of Board");
-        board.setName(scanner.nextLine());
-        System.out.println("Input description of Board:");
-        board.setDescription(scanner.nextLine());
+    private Repository<Board> repository;
 
-        if (addToList) {
-            System.out.println("Do you want to add cardList? Y/N");
-            if (scanner.next().equals("Y"))
-                board.setCardLists(addCardLists());
-            items.add(board);
-        }
-
-        return board;
-    }
-
-    private List<CardList> addCardLists() {
-        List<CardList> cardLists = new ArrayList<>();
-        CardListService cardListService = new CardListService();
-        int mark = 1;
-        while (mark == 1) {
-            cardLists.add(cardListService.create(true));
-            System.out.println("If you want to add one more cardList press '1' else press '0' ");
-            mark = scanner.nextInt();
-        }
-        return cardLists;
+    public BoardService() {
+        repository = new BoardRepositoryImpl();
     }
 
     @Override
-    public Board update(int index, Board obj) {
-        Board boardToUpdate = items.get(index);
-        boardToUpdate.setName(obj.getName());
-        boardToUpdate.setDescription(obj.getDescription());
-        return boardToUpdate;
+    public Board create(Board obj) {
+        return repository.create(obj);
+    }
+
+    @Override
+    public Board update(UUID id, Board obj) {
+        obj.setUpdatedDate(LocalDateTime.now());
+        return repository.update(id, obj);
+    }
+
+    @Override
+    public Board readById(UUID id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    public boolean delete(UUID id) {
+        repository.delete(id);
+        return false;
+    }
+
+    @Override
+    public List<Board> readAll() {
+        return repository.getObjects();
     }
 }
