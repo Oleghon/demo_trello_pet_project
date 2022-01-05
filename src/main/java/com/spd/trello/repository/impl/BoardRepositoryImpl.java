@@ -24,11 +24,6 @@ public class BoardRepositoryImpl implements Repository<Board> {
 
     @Override
     public Board create(Board obj) {
-
-        return obj;
-    }
-
-    public Board create(Board obj, UUID id) {
         try (Connection connection = config.getConnection(); PreparedStatement statement =
                 connection.prepareStatement("INSERT INTO boards(id, created_by, created_date, name, description, archived, visibility, workspace_id) " +
                         "VALUES(?,?,?,?,?,?,?,?)")) {
@@ -39,7 +34,7 @@ public class BoardRepositoryImpl implements Repository<Board> {
             statement.setString(5, obj.getDescription());
             statement.setBoolean(6, obj.getArchived());
             statement.setString(7, String.valueOf(obj.getVisibility()));
-            statement.setObject(8, id);
+            statement.setObject(8, obj.getWorkSpace().getId());
             statement.executeUpdate();
             addMemberRelations(obj, connection);
         } catch (SQLException e) {

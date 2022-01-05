@@ -1,5 +1,6 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.domain.Board;
 import com.spd.trello.domain.Member;
 import com.spd.trello.domain.WorkSpace;
 import com.spd.trello.domain.WorkSpaceVisibility;
@@ -16,9 +17,11 @@ import java.util.UUID;
 public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
 
     private final MemberRepositoryImpl memberRepository;
+    private final BoardRepositoryImpl boardRepository;
 
     public WorkSpaceRepositoryImpl() {
         memberRepository = new MemberRepositoryImpl();
+        boardRepository = new BoardRepositoryImpl();
     }
 
     @Override
@@ -34,6 +37,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
             statement.setString(6, String.valueOf(obj.getVisibility()));
             statement.executeUpdate();
             addMemberRelations(obj, connection);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -83,6 +87,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
                 resultSet.next();
                 foundSpace = buildWorkSpace(resultSet);
                 foundSpace.setWorkspaceMembers(getMembersForWorkSpace(index));
+                foundSpace.setBoardList(getBoardsForWorkSpace(index));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -98,14 +103,13 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         workSpace.setVisibility(WorkSpaceVisibility.valueOf(resultSet.getString("visibility")));
         workSpace.setName(resultSet.getString("name"));
         workSpace.setDescription(resultSet.getString("description"));
-//        workSpace.setBoardList(); // TODO
         return workSpace;
     }
 
     public List<Member> getMembersForWorkSpace(UUID spaceId) throws SQLException {
         List<Member> members = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, m.created_date as created_date, m.role as role, m.user_id as user_id " +
+        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
+                .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, m.updated_date as updated_date, m.created_date as created_date, m.role as role, m.user_id as user_id " +
                         "from workspaces w join space_member sm on w.id = sm.space_id join members m on m.id=sm.member_id where w.id = ?")) {
             statement.setObject(1, spaceId);
 
@@ -116,6 +120,20 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
             }
         }
         return members;
+    }
+
+    private List<Board> getBoardsForWorkSpace(UUID spaceId) throws SQLException {
+        List<Board> boards = new ArrayList<>();
+        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
+                .prepareStatement("select * from boards where workspace_id = ?")) {
+            statement.setObject(1, spaceId);
+            if (statement.execute()) {
+                ResultSet resultSet = statement.getResultSet();
+                while (resultSet.next())
+                    boards.add(boardRepository.buildBoard(resultSet));
+            }
+        }
+        return boards;
     }
 
     @Override
