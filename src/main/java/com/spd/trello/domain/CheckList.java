@@ -10,5 +10,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class CheckList extends Resource{
     private String name;
+    private Card card;
     private List<CheckableItem> items = new ArrayList<>();
 }

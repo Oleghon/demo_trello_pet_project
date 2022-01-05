@@ -11,4 +11,6 @@ public class Attachment extends Domain{
     private String link;
     private String name;
     private File file;
+    private Card card;
+    private Comment comment;
 }
