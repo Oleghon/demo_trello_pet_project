@@ -3,7 +3,6 @@ package com.spd.trello.repository.impl;
 import com.spd.trello.domain.Board;
 import com.spd.trello.domain.BoardVisibility;
 import com.spd.trello.domain.Member;
-import com.spd.trello.domain.WorkSpace;
 import com.spd.trello.repository.Repository;
 
 import java.sql.Connection;
@@ -12,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class BoardRepositoryImpl implements Repository<Board> {
@@ -60,6 +60,8 @@ public class BoardRepositoryImpl implements Repository<Board> {
         board.setId(UUID.fromString(resultSet.getString("id")));
         board.setCreatedBy(resultSet.getString("created_by"));
         board.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
+        board.setUpdatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
+                .map(String::new).orElse(""));
         board.setName(resultSet.getString("name"));
         board.setDescription(resultSet.getString("description"));
         board.setArchived(resultSet.getBoolean("archived"));
