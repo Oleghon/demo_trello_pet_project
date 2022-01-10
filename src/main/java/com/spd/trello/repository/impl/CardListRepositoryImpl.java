@@ -87,7 +87,7 @@ public class CardListRepositoryImpl implements Repository<CardList> {
         return cards;
     }
 
-    private CardList buildCardList(ResultSet resultSet) throws SQLException {
+    CardList buildCardList(ResultSet resultSet) throws SQLException {
         CardList cardList = new CardList();
         Board board = new Board();
         cardList.setId(UUID.fromString(resultSet.getString("id")));
@@ -99,19 +99,21 @@ public class CardListRepositoryImpl implements Repository<CardList> {
         cardList.setBoard(board);
         cardList.setName(resultSet.getString("name"));
         cardList.setArchived(resultSet.getBoolean("archived"));
-//        cardList.setCards(); //TODO
         return cardList;
     }
 
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (Connection connection = config.getConnection();
              PreparedStatement statement = connection.prepareStatement("DELETE FROM cardlists WHERE id = ?")) {
             statement.setObject(1, index);
-            statement.executeUpdate();
+            if (statement.executeUpdate() == 1)
+                flag = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return flag;
     }
 
     @Override

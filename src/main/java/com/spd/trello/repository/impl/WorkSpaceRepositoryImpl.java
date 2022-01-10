@@ -41,7 +41,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return obj;
+        return findById(obj.getId());
     }
 
     private void addMemberRelations(WorkSpace workSpace, Connection connection) throws SQLException {
@@ -67,14 +67,22 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
             statement.setString(5, String.valueOf(obj.getVisibility()));
             statement.setObject(6, index);
             statement.executeUpdate();
-            obj.getWorkspaceMembers().removeAll(getMembersForWorkSpace(index));
+            obj.setWorkspaceMembers(checkNewRelations(obj));
             if (!obj.getWorkspaceMembers().isEmpty())
                 addMemberRelations(obj, connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return obj;
+        return findById(index);
     }
+
+    public List<Member> checkNewRelations(WorkSpace workSpace) throws SQLException {
+        List<Member> members = workSpace.getWorkspaceMembers();
+        List<Member> removedMembers = getMembersForWorkSpace(workSpace.getId());
+        members.removeAll(removedMembers);
+        return members;
+    }
+
 
     @Override
     public WorkSpace findById(UUID index) {
@@ -95,7 +103,7 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         return foundSpace;
     }
 
-    private WorkSpace buildWorkSpace(ResultSet resultSet) throws SQLException {
+    WorkSpace buildWorkSpace(ResultSet resultSet) throws SQLException {
         WorkSpace workSpace = new WorkSpace();
         workSpace.setId(UUID.fromString(resultSet.getString("id")));
         workSpace.setCreatedBy(resultSet.getString("created_by"));
@@ -137,23 +145,17 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
     }
 
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("DELETE FROM workspaces WHERE id = ?")) {
-            deleteRelations(index, connection);
             statement.setObject(1, index);
-            statement.executeUpdate();
+            if (statement.executeUpdate() == 1)
+                flag = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private void deleteRelations(UUID index, Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM space_member WHERE space_id = ?")) {
-            statement.setObject(1, index);
-            statement.executeUpdate();
-        }
+        return flag;
     }
 
     @Override

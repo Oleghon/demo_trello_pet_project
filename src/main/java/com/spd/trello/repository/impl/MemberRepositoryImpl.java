@@ -26,7 +26,7 @@ public class MemberRepositoryImpl implements Repository<Member> {
             statement.setString(4, String.valueOf(obj.getRole()));
             statement.setObject(5, obj.getUser().getId());
             statement.executeUpdate();
-            createdMember = obj;
+            createdMember = findById(obj.getId());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -68,15 +68,13 @@ public class MemberRepositoryImpl implements Repository<Member> {
         return foundMember;
     }
 
-    public Member buildMember(ResultSet resultSet) throws SQLException {
+    Member buildMember(ResultSet resultSet) throws SQLException {
         Member member = new Member();
         User user = new User();
         member.setId(UUID.fromString(resultSet.getString("id")));
         member.setCreatedBy(resultSet.getString("created_by"));
         member.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
         member.setUpdatedBy(resultSet.getString("updated_by"));
-        if (null != resultSet.getTimestamp("updated_date"))
-            member.setUpdatedDate(resultSet.getTimestamp("updated_date").toLocalDateTime());
         member.setRole(Role.valueOf(resultSet.getString("role")));
         user.setId(UUID.fromString(resultSet.getString("user_id")));
         member.setUser(user);
@@ -85,14 +83,17 @@ public class MemberRepositoryImpl implements Repository<Member> {
 
 
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("DELETE FROM members WHERE id = ?")) {
             statement.setObject(1, index);
-            statement.executeUpdate();
+            if (statement.executeUpdate() == 1)
+                flag = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return flag;
     }
 
     @Override

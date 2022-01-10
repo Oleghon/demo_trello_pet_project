@@ -17,7 +17,7 @@ public interface Repository<T extends Domain> {
 
     T findById(UUID index);
 
-    void delete(UUID index);
+    boolean delete(UUID index);
 
     default List<T> getObjects() {
         return new ArrayList<>();

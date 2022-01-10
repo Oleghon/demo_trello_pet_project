@@ -69,14 +69,17 @@ public class UserRepositoryImpl implements Repository<User> {
     }
 
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("DELETE FROM users WHERE id = ?")) {
             statement.setObject(1, index);
-            statement.executeUpdate();
+           if(statement.executeUpdate() == 1)
+               flag= true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return flag;
     }
 
     private User buildUser(ResultSet set) throws SQLException {

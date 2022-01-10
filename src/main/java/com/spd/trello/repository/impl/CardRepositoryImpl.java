@@ -1,7 +1,6 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Card;
-import com.spd.trello.domain.Member;
+import com.spd.trello.domain.*;
 import com.spd.trello.repository.Repository;
 
 import java.sql.Connection;
@@ -16,9 +15,11 @@ import java.util.UUID;
 public class CardRepositoryImpl implements Repository<Card> {
 
     private MemberRepositoryImpl memberRepository;
+    private CommentRepositoryImpl commentRepository;
 
     public CardRepositoryImpl() {
         this.memberRepository = new MemberRepositoryImpl();
+        this.commentRepository = new CommentRepositoryImpl();
     }
 
     @Override
@@ -39,7 +40,7 @@ public class CardRepositoryImpl implements Repository<Card> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return obj;
+        return findById(obj.getId());
     }
 
     private void addMemberRelations(Card obj, Connection connection) throws SQLException {
@@ -84,6 +85,7 @@ public class CardRepositoryImpl implements Repository<Card> {
                 resultSet.next();
                 foundCard = buildCard(resultSet);
                 foundCard.setAssignedMembers(getMembersForCard(index));
+                foundCard.setComments(getCommentsForCard(index, connection));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -91,16 +93,22 @@ public class CardRepositoryImpl implements Repository<Card> {
         return foundCard;
     }
 
-    public Card buildCard(ResultSet resultSet) throws SQLException {
+    Card buildCard(ResultSet resultSet) throws SQLException {
         Card card = new Card();
+        CardList cardList = new CardList();
         card.setId(UUID.fromString(resultSet.getString("id")));
         card.setCreatedBy(resultSet.getString("created_by"));
         card.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
-        card.setCreatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
+        card.setUpdatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
                 .map(String::new).orElse(""));
         card.setName(resultSet.getString("name"));
         card.setDescription(resultSet.getString("description"));
         card.setArchived(resultSet.getBoolean("archived"));
+        cardList.setId(UUID.fromString(resultSet.getString("cardlist_id")));
+        card.setCardList(cardList);
+//        card.setCheckList();
+//        card.setReminder();
+//        card.setLabels();
         return card;
     }
 
@@ -122,25 +130,43 @@ public class CardRepositoryImpl implements Repository<Card> {
         return members;
     }
 
+    private List<Comment> getCommentsForCard(UUID uuid, Connection connection) throws SQLException {
+        List<Comment> comments = new ArrayList<>();
+        try (PreparedStatement statement = connection
+                .prepareStatement("select * from comments where card_id=?")) {
+            statement.setObject(1, uuid);
+            if (statement.execute()) {
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next())
+                    comments.add(commentRepository.buildComment(resultSet));
+            }
+        }
+        return comments;
+    }
+
+    private Reminder getReminder(UUID uuid) throws SQLException {
+        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
+                .prepareStatement("select * from comments where card_id=?")) {
+            statement.setObject(1, uuid);
+
+        }
+        return null;
+    }
+
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (Connection connection = config.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement("delete from cards where id=?")) {
             statement.setObject(1, index);
-            deleteRelations(index, connection);
-            statement.executeUpdate();
+//            deleteRelations(index, connection);
+            if (statement.executeUpdate() == 1)
+                flag = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private void deleteRelations(UUID index, Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM card_member WHERE card_id = ?")) {
-            statement.setObject(1, index);
-            statement.executeUpdate();
-        }
+        return flag;
     }
 
     @Override

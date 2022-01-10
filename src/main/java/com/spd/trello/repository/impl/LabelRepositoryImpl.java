@@ -60,7 +60,7 @@ public class LabelRepositoryImpl implements Repository<Label> {
         return label;
     }
 
-    private Label buildLabel(ResultSet resultSet) throws SQLException {
+    Label buildLabel(ResultSet resultSet) throws SQLException {
         Label label = new Label();
         label.setId((UUID) resultSet.getObject("id"));
         label.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
@@ -85,14 +85,16 @@ public class LabelRepositoryImpl implements Repository<Label> {
     }
 
     @Override
-    public void delete(UUID index) {
+    public boolean delete(UUID index) {
+        boolean flag = false;
         try (PreparedStatement statement = config.getConnection()
                 .prepareStatement("DELETE FROM labels WHERE id = ?")) {
             statement.setObject(1, index);
             if (statement.executeUpdate() == 1)
-                System.out.println("delete complete");
+                flag = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return flag;
     }
 }
