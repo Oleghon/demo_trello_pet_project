@@ -3,6 +3,6 @@ CREATE TABLE attachments(
     link VARCHAR(200) NOT NULL,
     name VARCHAR(200) NOT NULL,
     file bytea NOT NULL,
-    card_id uuid CONSTRAINT attachment_card_id_fk REFERENCES cards(id),
-    comment_id uuid CONSTRAINT attachment_comment_id_fk REFERENCES comments(id)
+    card_id uuid CONSTRAINT attachment_card_id_fk REFERENCES cards(id) on delete cascade,
+    comment_id uuid CONSTRAINT attachment_comment_id_fk REFERENCES comments(id) on delete cascade
 );

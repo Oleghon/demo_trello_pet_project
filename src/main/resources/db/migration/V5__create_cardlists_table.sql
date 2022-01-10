@@ -6,5 +6,5 @@ create TABLE cardlists(
     updated_date TIMESTAMP without time zone,
     name VARCHAR(200) NOT NULL,
     archived BOOLEAN NOT NULL,
-    board_id uuid NOT NULL CONSTRAINT cardlist_board_id_fk REFERENCES boards(id)
+    board_id uuid NOT NULL CONSTRAINT cardlist_board_id_fk REFERENCES boards(id) on delete cascade
 );

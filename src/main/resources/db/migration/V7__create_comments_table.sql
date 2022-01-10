@@ -5,5 +5,5 @@ CREATE TABLE comments(
     created_date TIMESTAMP without time zone NOT NULL,
     updated_date TIMESTAMP without time zone,
     text VARCHAR(200) NOT NULL,
-    card_id uuid NOT NULL CONSTRAINT comment_card_id_fk REFERENCES cards(id)
+    card_id uuid NOT NULL CONSTRAINT comment_card_id_fk REFERENCES cards(id) on delete cascade
 );
