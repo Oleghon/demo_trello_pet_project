@@ -4,7 +4,6 @@ import com.spd.trello.domain.*;
 import com.spd.trello.repository.Repository;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,11 +14,13 @@ public class CardRepositoryImpl implements Repository<Card> {
     private MemberRepositoryImpl memberRepository;
     private CommentRepositoryImpl commentRepository;
     private ReminderRepositoryImpl reminderRepository;
+    private CheckListRepositoryImpl checkListRepository;
 
     public CardRepositoryImpl() {
         this.memberRepository = new MemberRepositoryImpl();
         this.commentRepository = new CommentRepositoryImpl();
         this.reminderRepository = new ReminderRepositoryImpl();
+        this.commentRepository = new CommentRepositoryImpl();
     }
 
     @Override
@@ -58,7 +59,7 @@ public class CardRepositoryImpl implements Repository<Card> {
     public Card update(UUID index, Card obj) {
         try (Connection connection = config.getConnection();
              PreparedStatement statement = connection
-                     .prepareStatement("update card set updated_by=?, updated_date=?, name=?, description=?, archived=?, cardlist_id=? where id=?")) {
+                     .prepareStatement("update cards set updated_by=?, updated_date=?, name=?, description=?, archived=?, cardlist_id=? where id=?")) {
             statement.setString(1, obj.getUpdatedBy());
             statement.setObject(2, obj.getUpdatedDate());
             statement.setString(3, obj.getName());
@@ -68,8 +69,10 @@ public class CardRepositoryImpl implements Repository<Card> {
             statement.setObject(7, index);
             statement.executeUpdate();
             obj.setAssignedMembers(checkNewRelations(obj));
-            if (!obj.getAssignedMembers().isEmpty())
+            if (!obj.getAssignedMembers().isEmpty()) {
+                System.out.println(obj.getAssignedMembers());
                 addMemberRelations(obj, connection);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -96,7 +99,8 @@ public class CardRepositoryImpl implements Repository<Card> {
                 foundCard = buildCard(resultSet);
                 foundCard.setAssignedMembers(getMembersForCard(index));
                 foundCard.setComments(getCommentsForCard(index, connection));
-                foundCard.setReminder(getReminder(index));
+                foundCard.setReminder(getReminder(index, connection));
+                foundCard.setCheckList(getCheckListsForCard(index, connection));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -118,7 +122,6 @@ public class CardRepositoryImpl implements Repository<Card> {
         card.setArchived(resultSet.getBoolean("archived"));
         cardList.setId(UUID.fromString(resultSet.getString("cardlist_id")));
         card.setCardList(cardList);
-//        card.setCheckList();
 //        card.setLabels();
         return card;
     }
@@ -127,7 +130,7 @@ public class CardRepositoryImpl implements Repository<Card> {
         List<Member> members = new ArrayList<>();
         try (Connection connection = config.getConnection(); PreparedStatement statement = connection
                 .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
-                        "m.created_date as created_date, m.role as role, m.user_id as user_id from cards c " +
+                        "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from cards c " +
                         "join card_member cm on cm.card_id = c.id " +
                         "join members m on cm.member_id = m.id where c.id = ?")) {
             statement.setObject(1, index);
@@ -155,9 +158,23 @@ public class CardRepositoryImpl implements Repository<Card> {
         return comments;
     }
 
-    private Reminder getReminder(UUID uuid) throws SQLException {
+    private List<CheckList> getCheckListsForCard(UUID uuid, Connection connection) throws SQLException {
+        List<CheckList> checkLists = new ArrayList<>();
+        try (PreparedStatement statement = connection
+                .prepareStatement("select * from checklists where card_id=?")) {
+            statement.setObject(1, uuid);
+            if (statement.execute()) {
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next())
+                    checkLists.add(checkListRepository.buildCheckList(resultSet));
+            }
+        }
+        return checkLists;
+    }
+
+    private Reminder getReminder(UUID uuid, Connection connection) throws SQLException {
         Reminder reminder = new Reminder();
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
+        try (PreparedStatement statement = connection
                 .prepareStatement("select * from reminders where card_id=?")) {
             statement.setObject(1, uuid);
             if (statement.execute()) {

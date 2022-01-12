@@ -81,7 +81,7 @@ public class CheckListRepositoryImpl implements Repository<CheckList> {
         return checkableItems;
     }
 
-    private CheckList buildCheckList(ResultSet resultSet) throws SQLException {
+    CheckList buildCheckList(ResultSet resultSet) throws SQLException {
         CheckList checkList = new CheckList();
         Card fk = new Card();
         checkList.setId(UUID.fromString(resultSet.getString("id")));

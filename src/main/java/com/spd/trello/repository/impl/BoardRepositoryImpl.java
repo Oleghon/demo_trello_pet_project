@@ -121,7 +121,7 @@ public class BoardRepositoryImpl implements Repository<Board> {
         List<Member> members = new ArrayList<>();
         try (PreparedStatement statement = config.getConnection().prepareStatement(
                         "select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
-                        "m.created_date as created_date, m.role as role, m.user_id as user_id from boards b " +
+                        "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from boards b " +
                         "join board_member bm on b.id = bm.board_id " +
                         "join members m on bm.member_id = m.id where b.id = ?")) {
             statement.setObject(1, index);
