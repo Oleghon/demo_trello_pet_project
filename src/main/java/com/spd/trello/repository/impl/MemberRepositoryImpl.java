@@ -5,12 +5,10 @@ import com.spd.trello.domain.Role;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MemberRepositoryImpl implements Repository<Member> {
@@ -26,7 +24,7 @@ public class MemberRepositoryImpl implements Repository<Member> {
             statement.setString(4, String.valueOf(obj.getRole()));
             statement.setObject(5, obj.getUser().getId());
             statement.executeUpdate();
-            createdMember = obj;
+            createdMember = findById(obj.getId());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -68,15 +66,15 @@ public class MemberRepositoryImpl implements Repository<Member> {
         return foundMember;
     }
 
-    public Member buildMember(ResultSet resultSet) throws SQLException {
+    Member buildMember(ResultSet resultSet) throws SQLException {
         Member member = new Member();
         User user = new User();
         member.setId(UUID.fromString(resultSet.getString("id")));
         member.setCreatedBy(resultSet.getString("created_by"));
         member.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
         member.setUpdatedBy(resultSet.getString("updated_by"));
-        if (null != resultSet.getTimestamp("updated_date"))
-            member.setUpdatedDate(resultSet.getTimestamp("updated_date").toLocalDateTime());
+        member.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         member.setRole(Role.valueOf(resultSet.getString("role")));
         user.setId(UUID.fromString(resultSet.getString("user_id")));
         member.setUser(user);
@@ -85,14 +83,8 @@ public class MemberRepositoryImpl implements Repository<Member> {
 
 
     @Override
-    public void delete(UUID index) {
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM members WHERE id = ?")) {
-            statement.setObject(1, index);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public boolean delete(UUID index) {
+        return new Helper().delete(index, "DELETE FROM members WHERE id = ?");
     }
 
     @Override

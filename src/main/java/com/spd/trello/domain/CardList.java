@@ -9,6 +9,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class CardList extends Resource{
     private String name;
+    private Board board;
     private List<Card> cards = new ArrayList<>();
     private Boolean archived = false;
 }

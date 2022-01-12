@@ -11,6 +11,7 @@ import java.util.List;
 public class Board extends Resource{
     private String name;
     private String description;
+    private WorkSpace workSpace;
     private List<CardList> cardLists = new ArrayList<>();
     private List<Member> members = new ArrayList<>();
     private Boolean archived = false;
