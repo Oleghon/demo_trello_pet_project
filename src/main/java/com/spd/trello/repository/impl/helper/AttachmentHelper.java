@@ -59,13 +59,13 @@ public class AttachmentHelper {
                 resultSet.next();
                 foundAttachment = buildAttachment(resultSet);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
         return foundAttachment;
     }
 
-    private Attachment buildAttachment(ResultSet resultSet) throws SQLException {
+    private Attachment buildAttachment(ResultSet resultSet) throws SQLException, IOException {
         Attachment attachment = new Attachment();
         attachment.setId(UUID.fromString(resultSet.getString("id")));
         attachment.setName(resultSet.getString("name"));
@@ -88,7 +88,7 @@ public class AttachmentHelper {
         return attachment;
     }
 
-    public boolean delete(UUID id) throws SQLException {
+    public boolean delete(UUID id) {
         return new Repository.Helper().delete(id, "delete from attachments where id = ?");
     }
 
@@ -107,11 +107,9 @@ public class AttachmentHelper {
         return bytes;
     }
 
-    private File writeBytesToFile(File file, byte[] bytes) {
+    private File writeBytesToFile(File file, byte[] bytes) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return file;
     }
