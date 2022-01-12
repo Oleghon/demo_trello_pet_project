@@ -16,7 +16,6 @@ public class Card extends Resource{
     private String description;
     private CardList cardList;
     private Boolean archived = false;
-    private LocalDateTime creationDate = LocalDateTime.now();
     private List<Member> assignedMembers = new ArrayList<>();
     private List<Comment> comments;
     private List<Label> labels;
