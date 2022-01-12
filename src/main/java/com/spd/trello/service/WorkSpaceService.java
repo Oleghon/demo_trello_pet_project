@@ -7,6 +7,7 @@ import com.spd.trello.domain.WorkSpaceVisibility;
 import com.spd.trello.repository.Repository;
 import com.spd.trello.repository.impl.WorkSpaceRepositoryImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class WorkSpaceService extends AbstractService<WorkSpace> {
 
     @Override
     public WorkSpace update(UUID id, WorkSpace obj) {
+        obj.setUpdatedDate(LocalDateTime.now());
         return repository.update(id, obj);
     }
 
@@ -47,8 +49,7 @@ public class WorkSpaceService extends AbstractService<WorkSpace> {
 
     @Override
     public boolean delete(UUID id) {
-        repository.delete(id);
-        return false;
+        return repository.delete(id);
     }
 
     @Override

@@ -34,8 +34,7 @@ public class BoardService extends AbstractService<Board> {
 
     @Override
     public boolean delete(UUID id) {
-        repository.delete(id);
-        return false;
+        return repository.delete(id);
     }
 
     @Override
