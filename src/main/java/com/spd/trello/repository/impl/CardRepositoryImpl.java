@@ -3,10 +3,8 @@ package com.spd.trello.repository.impl;
 import com.spd.trello.domain.*;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +14,12 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     private MemberRepositoryImpl memberRepository;
     private CommentRepositoryImpl commentRepository;
+    private ReminderRepositoryImpl reminderRepository;
 
     public CardRepositoryImpl() {
         this.memberRepository = new MemberRepositoryImpl();
         this.commentRepository = new CommentRepositoryImpl();
+        this.reminderRepository = new ReminderRepositoryImpl();
     }
 
     @Override
@@ -67,10 +67,20 @@ public class CardRepositoryImpl implements Repository<Card> {
             statement.setObject(6, obj.getCardList().getId());
             statement.setObject(7, index);
             statement.executeUpdate();
+            obj.setAssignedMembers(checkNewRelations(obj));
+            if (!obj.getAssignedMembers().isEmpty())
+                addMemberRelations(obj, connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return obj;
+        return findById(index);
+    }
+
+    public List<Member> checkNewRelations(Card card) throws SQLException {
+        List<Member> members = card.getAssignedMembers();
+        List<Member> removedMembers = getMembersForCard(card.getId());
+        members.removeAll(removedMembers);
+        return members;
     }
 
     @Override
@@ -86,6 +96,7 @@ public class CardRepositoryImpl implements Repository<Card> {
                 foundCard = buildCard(resultSet);
                 foundCard.setAssignedMembers(getMembersForCard(index));
                 foundCard.setComments(getCommentsForCard(index, connection));
+                foundCard.setReminder(getReminder(index));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -98,16 +109,16 @@ public class CardRepositoryImpl implements Repository<Card> {
         CardList cardList = new CardList();
         card.setId(UUID.fromString(resultSet.getString("id")));
         card.setCreatedBy(resultSet.getString("created_by"));
+        card.setUpdatedBy(resultSet.getString("updated_by"));
         card.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
-        card.setUpdatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
-                .map(String::new).orElse(""));
+        card.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         card.setName(resultSet.getString("name"));
         card.setDescription(resultSet.getString("description"));
         card.setArchived(resultSet.getBoolean("archived"));
         cardList.setId(UUID.fromString(resultSet.getString("cardlist_id")));
         card.setCardList(cardList);
 //        card.setCheckList();
-//        card.setReminder();
 //        card.setLabels();
         return card;
     }
@@ -145,28 +156,22 @@ public class CardRepositoryImpl implements Repository<Card> {
     }
 
     private Reminder getReminder(UUID uuid) throws SQLException {
+        Reminder reminder = new Reminder();
         try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("select * from comments where card_id=?")) {
+                .prepareStatement("select * from reminders where card_id=?")) {
             statement.setObject(1, uuid);
-
+            if (statement.execute()) {
+                ResultSet resultSet = statement.executeQuery();
+                resultSet.next();
+                reminder = reminderRepository.buildReminder(resultSet);
+            }
         }
-        return null;
+        return reminder;
     }
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("delete from cards where id=?")) {
-            statement.setObject(1, index);
-//            deleteRelations(index, connection);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Repository.Helper().delete(index, "delete from cards where id=?");
     }
 
     @Override

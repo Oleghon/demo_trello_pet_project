@@ -86,15 +86,6 @@ public class LabelRepositoryImpl implements Repository<Label> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("DELETE FROM labels WHERE id = ?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Repository.Helper().delete(index,"DELETE FROM labels WHERE id = ?");
     }
 }

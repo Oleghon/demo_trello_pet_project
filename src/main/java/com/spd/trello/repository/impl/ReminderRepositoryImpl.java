@@ -5,6 +5,7 @@ import com.spd.trello.domain.Reminder;
 import com.spd.trello.repository.Repository;
 
 import java.sql.*;
+import java.util.Optional;
 import java.util.UUID;
 
 public class ReminderRepositoryImpl implements Repository<Reminder> {
@@ -70,9 +71,12 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
         reminder.setId(UUID.fromString(resultSet.getString("id")));
         reminder.setCreatedBy(resultSet.getString("created_by"));
         reminder.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
-        reminder.setRemindOn(resultSet.getTimestamp("remind_on").toLocalDateTime());
-        reminder.setStart(resultSet.getTimestamp("starts").toLocalDateTime());
-        reminder.setEnd(resultSet.getTimestamp("ends").toLocalDateTime());
+        reminder.setRemindOn(Optional.ofNullable(resultSet.getTimestamp("remind_on"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
+        reminder.setStart(Optional.ofNullable(resultSet.getTimestamp("starts"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
+        reminder.setEnd(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         reminder.setAlive(resultSet.getBoolean("alive"));
         card.setId(UUID.fromString(resultSet.getString("card_id")));
         reminder.setCard(card);
@@ -81,15 +85,6 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("delete from reminders where id=?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Helper().delete(index, "DELETE FROM reminders WHERE id = ?");
     }
 }

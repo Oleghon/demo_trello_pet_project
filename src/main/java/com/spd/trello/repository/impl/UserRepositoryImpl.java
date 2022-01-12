@@ -3,12 +3,10 @@ package com.spd.trello.repository.impl;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class UserRepositoryImpl implements Repository<User> {
@@ -17,8 +15,8 @@ public class UserRepositoryImpl implements Repository<User> {
         User createdUser = null;
         try (Connection connection = config.getConnection();
              PreparedStatement statement = connection
-                .prepareStatement("INSERT INTO users(id, created_by, created_date, first_name, last_name, email) " +
-                        "VALUES(?,?,?,?,?,?);")) {
+                     .prepareStatement("INSERT INTO users(id, created_by, created_date, first_name, last_name, email) " +
+                             "VALUES(?,?,?,?,?,?);")) {
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
@@ -70,16 +68,7 @@ public class UserRepositoryImpl implements Repository<User> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM users WHERE id = ?")) {
-            statement.setObject(1, index);
-           if(statement.executeUpdate() == 1)
-               flag= true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Helper().delete(index, "DELETE FROM users WHERE id = ?");
     }
 
     private User buildUser(ResultSet set) throws SQLException {
@@ -88,8 +77,8 @@ public class UserRepositoryImpl implements Repository<User> {
         result.setCreatedBy(set.getString("created_by"));
         result.setCreatedDate(set.getTimestamp("created_date").toLocalDateTime());
         result.setUpdatedBy(set.getString("updated_by"));
-        if (null != set.getTimestamp("updated_date"))
-            result.setUpdatedDate(set.getTimestamp("updated_date").toLocalDateTime());
+        result.setUpdatedDate(Optional.ofNullable(set.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         result.setFirstName(set.getString("first_name"));
         result.setLastName(set.getString("last_name"));
         result.setEmail(set.getString("email"));

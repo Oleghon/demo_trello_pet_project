@@ -6,10 +6,7 @@ import com.spd.trello.domain.CardList;
 import com.spd.trello.domain.Member;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,13 +59,13 @@ public class BoardRepositoryImpl implements Repository<Board> {
         board.setId(UUID.fromString(resultSet.getString("id")));
         board.setCreatedBy(resultSet.getString("created_by"));
         board.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
-        board.setUpdatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
-                .map(String::new).orElse(""));
+        board.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
+        board.setUpdatedBy(resultSet.getString("updated_by"));
         board.setName(resultSet.getString("name"));
         board.setDescription(resultSet.getString("description"));
         board.setArchived(resultSet.getBoolean("archived"));
         board.setVisibility(BoardVisibility.valueOf(resultSet.getString("visibility")));
-//        board.setCardLists();
         return board;
     }
 

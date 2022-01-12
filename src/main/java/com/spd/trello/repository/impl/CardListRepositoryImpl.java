@@ -5,10 +5,7 @@ import com.spd.trello.domain.Card;
 import com.spd.trello.domain.CardList;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +63,7 @@ public class CardListRepositoryImpl implements Repository<CardList> {
                 ResultSet resultSet = statement.getResultSet();
                 resultSet.next();
                 cardList = buildCardList(resultSet);
+                cardList.setCards(getCardsForCardList(index));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,7 +74,7 @@ public class CardListRepositoryImpl implements Repository<CardList> {
     private List<Card> getCardsForCardList(UUID id) throws SQLException {
         List<Card> cards = new ArrayList<>();
         try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("select id from cards where cardlist_id = ?")) {
+                .prepareStatement("select * from cards where cardlist_id = ?")) {
             statement.setObject(1, id);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
@@ -92,9 +90,10 @@ public class CardListRepositoryImpl implements Repository<CardList> {
         Board board = new Board();
         cardList.setId(UUID.fromString(resultSet.getString("id")));
         cardList.setCreatedBy(resultSet.getString("created_by"));
+        cardList.setUpdatedBy(resultSet.getString("updated_by"));
         cardList.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
-        cardList.setUpdatedBy(Optional.ofNullable(resultSet.getString("updated_by"))
-                .map(String::new).orElse(""));
+        cardList.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         board.setId(UUID.fromString(resultSet.getString("board_id")));
         cardList.setBoard(board);
         cardList.setName(resultSet.getString("name"));
@@ -104,16 +103,7 @@ public class CardListRepositoryImpl implements Repository<CardList> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection.prepareStatement("DELETE FROM cardlists WHERE id = ?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Repository.Helper().delete(index, "DELETE FROM cardlists WHERE id = ?");
     }
 
     @Override

@@ -6,12 +6,10 @@ import com.spd.trello.domain.WorkSpace;
 import com.spd.trello.domain.WorkSpaceVisibility;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
@@ -83,7 +81,6 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         return members;
     }
 
-
     @Override
     public WorkSpace findById(UUID index) {
         WorkSpace foundSpace = null;
@@ -107,7 +104,10 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         WorkSpace workSpace = new WorkSpace();
         workSpace.setId(UUID.fromString(resultSet.getString("id")));
         workSpace.setCreatedBy(resultSet.getString("created_by"));
+        workSpace.setUpdatedBy(resultSet.getString("updated_by"));
         workSpace.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
+        workSpace.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         workSpace.setVisibility(WorkSpaceVisibility.valueOf(resultSet.getString("visibility")));
         workSpace.setName(resultSet.getString("name"));
         workSpace.setDescription(resultSet.getString("description"));
@@ -146,16 +146,8 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM workspaces WHERE id = ?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Helper().delete(index, "DELETE FROM workspaces WHERE id = ?");
+
     }
 
     @Override

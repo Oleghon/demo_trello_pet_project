@@ -5,12 +5,10 @@ import com.spd.trello.domain.Role;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class MemberRepositoryImpl implements Repository<Member> {
@@ -75,6 +73,8 @@ public class MemberRepositoryImpl implements Repository<Member> {
         member.setCreatedBy(resultSet.getString("created_by"));
         member.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
         member.setUpdatedBy(resultSet.getString("updated_by"));
+        member.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
         member.setRole(Role.valueOf(resultSet.getString("role")));
         user.setId(UUID.fromString(resultSet.getString("user_id")));
         member.setUser(user);
@@ -84,16 +84,7 @@ public class MemberRepositoryImpl implements Repository<Member> {
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("DELETE FROM members WHERE id = ?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Helper().delete(index, "DELETE FROM members WHERE id = ?");
     }
 
     @Override
