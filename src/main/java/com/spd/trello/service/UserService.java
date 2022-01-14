@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class UserService extends AbstractService<User>{
+public class UserService extends AbstractService<User> {
 
     private final UserRepositoryImpl userRepository;
 
@@ -43,8 +43,7 @@ public class UserService extends AbstractService<User>{
 
     @Override
     public boolean delete(UUID id) {
-        userRepository.delete(id);
-        return false;
+        return userRepository.delete(id);
     }
 
     @Override

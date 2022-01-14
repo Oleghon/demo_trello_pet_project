@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public class MemberService extends AbstractService<Member>{
 
+    private MemberRepositoryImpl repository;
+
     public MemberService() {
         repository = new MemberRepositoryImpl();
     }
@@ -41,8 +43,7 @@ public class MemberService extends AbstractService<Member>{
 
     @Override
     public boolean delete(UUID id) {
-        repository.delete(id);
-        return false;
+        return repository.delete(id);
     }
 
     @Override
