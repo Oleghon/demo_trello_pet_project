@@ -20,7 +20,7 @@ public class CardRepositoryImpl implements Repository<Card> {
         this.memberRepository = new MemberRepositoryImpl();
         this.commentRepository = new CommentRepositoryImpl();
         this.reminderRepository = new ReminderRepositoryImpl();
-        this.commentRepository = new CommentRepositoryImpl();
+        this.checkListRepository = new CheckListRepositoryImpl();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     @Override
     public Card findById(UUID index) {
-        Card foundCard = null;
+
         try (Connection connection = config.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement("select * from cards where id=?")) {
@@ -96,16 +96,17 @@ public class CardRepositoryImpl implements Repository<Card> {
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
                 resultSet.next();
-                foundCard = buildCard(resultSet);
-                foundCard.setAssignedMembers(getMembersForCard(index));
+                Card foundCard = buildCard(resultSet);
                 foundCard.setComments(getCommentsForCard(index, connection));
+                foundCard.setAssignedMembers(getMembersForCard(index));
                 foundCard.setReminder(getReminder(index, connection));
                 foundCard.setCheckList(getCheckListsForCard(index, connection));
+                return foundCard;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return foundCard;
+        throw new RuntimeException("Entity card not found by id: " + index);
     }
 
     Card buildCard(ResultSet resultSet) throws SQLException {
@@ -159,17 +160,17 @@ public class CardRepositoryImpl implements Repository<Card> {
     }
 
     private List<CheckList> getCheckListsForCard(UUID uuid, Connection connection) throws SQLException {
-        List<CheckList> checkLists = new ArrayList<>();
         try (PreparedStatement statement = connection
                 .prepareStatement("select * from checklists where card_id=?")) {
+            List<CheckList> checkLists = new ArrayList<>();
             statement.setObject(1, uuid);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next())
                     checkLists.add(checkListRepository.buildCheckList(resultSet));
             }
+            return checkLists;
         }
-        return checkLists;
     }
 
     private Reminder getReminder(UUID uuid, Connection connection) throws SQLException {

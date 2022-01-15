@@ -3,6 +3,7 @@ package com.spd.trello.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
+
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,19 +13,19 @@ import java.util.Properties;
 
 public class JdbcConfig {
 
-   private static DataSource dataSource;
+    private static DataSource dataSource;
 
-    {
+    static {
         createDataSource();
         Flyway flyway = createFlyway(dataSource);
         flyway.migrate();
     }
 
-    public Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 
-    public void createDataSource() {
+    public static void createDataSource() {
         Properties properties = null;
         try {
             properties = loadProperties();
@@ -40,13 +41,13 @@ public class JdbcConfig {
         dataSource = new HikariDataSource(hikari);
     }
 
-    public Flyway createFlyway(DataSource dataSource) {
+    public static Flyway createFlyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
                 .load();
     }
 
-    private Properties loadProperties() throws IOException {
+    public static Properties loadProperties() throws IOException {
         InputStream resourceAsStream = JdbcConfig.class.getClassLoader().getResourceAsStream("application.properties");
         Properties properties = new Properties();
         properties.load(resourceAsStream);
