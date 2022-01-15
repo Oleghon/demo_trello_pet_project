@@ -27,19 +27,18 @@ public interface Repository<T extends Domain> {
     }
 
     class Helper {
-      public boolean delete(UUID id, String SQL) {
-            boolean flag = false;
-            try (Connection connection = JdbcConfig.getConnection();
+        public boolean delete(UUID id, String SQL) {
+            try (Connection connection = config.getConnection();
                  PreparedStatement statement = connection
                          .prepareStatement(SQL)) {
                 statement.setObject(1, id);
                 int i = statement.executeUpdate();
                 if (i == 1)
-                    flag = true;
+                    return true;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            return flag;
+            return false;
         }
     }
 }
