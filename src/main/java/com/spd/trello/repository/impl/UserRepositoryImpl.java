@@ -1,9 +1,13 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,11 +16,10 @@ import java.util.UUID;
 public class UserRepositoryImpl implements Repository<User> {
     @Override
     public User create(User obj) {
-        User createdUser = null;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("INSERT INTO users(id, created_by, created_date, first_name, last_name, email) " +
-                             "VALUES(?,?,?,?,?,?);")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("INSERT INTO users(id, created_by, created_date, first_name, last_name, email) " +
+                            "VALUES(?,?,?,?,?,?);");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
@@ -24,18 +27,15 @@ public class UserRepositoryImpl implements Repository<User> {
             statement.setString(5, obj.getLastName());
             statement.setString(6, obj.getEmail());
             statement.executeUpdate();
-            createdUser = findById(obj.getId());
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return createdUser;
+            return obj;
+        });
     }
 
     @Override
     public User update(UUID index, User obj) {
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("UPDATE users SET first_name = ?, last_name = ?, email = ?, updated_by = ?, updated_date = ? WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("UPDATE users SET first_name = ?, last_name = ?, email = ?, updated_by = ?, updated_date = ? WHERE id = ?");
             statement.setString(1, obj.getFirstName());
             statement.setString(2, obj.getLastName());
             statement.setString(3, obj.getEmail());
@@ -43,27 +43,23 @@ public class UserRepositoryImpl implements Repository<User> {
             statement.setObject(5, obj.getUpdatedDate());
             statement.setObject(6, index);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(index);
+            return obj;
+        });
     }
 
     @Override
     public User findById(UUID index) {
-        User createdUser = null;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("SELECT * FROM users WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("SELECT * FROM users WHERE id = ?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
                 resultSet.next();
-                createdUser = buildUser(resultSet);
+                return buildUser(resultSet);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return createdUser;
+            throw new RuntimeException("entity not found");
+        });
     }
 
     @Override
@@ -87,17 +83,17 @@ public class UserRepositoryImpl implements Repository<User> {
 
     @Override
     public List<User> getObjects() {
-        List<User> users = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("SELECT * FROM users")) {
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    users.add(buildUser(resultSet));
+        return JdbcConfig.execute((connection) ->
+        {
+            List<User> users = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM users")) {
+                if (statement.execute()) {
+                    ResultSet resultSet = statement.getResultSet();
+                    while (resultSet.next())
+                        users.add(buildUser(resultSet));
+                }
+                return users;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return users;
+        });
     }
 }

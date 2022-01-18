@@ -1,5 +1,6 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Board;
 import com.spd.trello.domain.BoardVisibility;
 import com.spd.trello.domain.CardList;
@@ -24,9 +25,10 @@ public class BoardRepositoryImpl implements Repository<Board> {
 
     @Override
     public Board create(Board obj) {
-        try (Connection connection = config.getConnection(); PreparedStatement statement =
-                connection.prepareStatement("INSERT INTO boards(id, created_by, created_date, name, description, archived, visibility, workspace_id) " +
-                        "VALUES(?,?,?,?,?,?,?,?)")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement =
+                    connection.prepareStatement("INSERT INTO boards(id, created_by, created_date, name, description, archived, visibility, workspace_id) " +
+                            "VALUES(?,?,?,?,?,?,?,?)");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
@@ -37,10 +39,8 @@ public class BoardRepositoryImpl implements Repository<Board> {
             statement.setObject(8, obj.getWorkSpace().getId());
             statement.executeUpdate();
             addMemberRelations(obj, connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return obj;
+            return obj;
+        });
     }
 
     private void addMemberRelations(Board obj, Connection connection) throws SQLException {
@@ -71,8 +71,9 @@ public class BoardRepositoryImpl implements Repository<Board> {
 
     @Override
     public Board update(UUID index, Board obj) {
-        try (Connection connection = config.getConnection(); PreparedStatement statement =
-                connection.prepareStatement("UPDATE boards SET updated_by=?, updated_date=?, name=?, description=?, archived=?, visibility=? where id=?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement =
+                    connection.prepareStatement("UPDATE boards SET updated_by=?, updated_date=?, name=?, description=?, archived=?, visibility=? where id=?");
             statement.setString(1, obj.getUpdatedBy());
             statement.setObject(2, obj.getUpdatedDate());
             statement.setString(3, obj.getName());
@@ -82,12 +83,11 @@ public class BoardRepositoryImpl implements Repository<Board> {
             statement.setObject(7, index);
             statement.executeUpdate();
             obj.setMembers(checkNewRelations(obj));
-            if (!obj.getMembers().isEmpty())
+            if (!obj.getMembers().isEmpty()) {
                 addMemberRelations(obj, connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(index);
+            }
+            return obj;
+        });
     }
 
     public List<Member> checkNewRelations(Board board) throws SQLException {
@@ -99,31 +99,30 @@ public class BoardRepositoryImpl implements Repository<Board> {
 
     @Override
     public Board findById(UUID index) {
-        Board foundBoard = null;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "select * from boards where id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection.prepareStatement(
+                    "select * from boards where id = ?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
                 resultSet.next();
-                foundBoard = buildBoard(resultSet);
+                Board foundBoard = buildBoard(resultSet);
                 foundBoard.setMembers(getMembersForBoard(index));
                 foundBoard.setCardLists(getCardLists(index, connection));
+                return foundBoard;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return foundBoard;
+            throw new RuntimeException();
+        });
     }
 
     private List<Member> getMembersForBoard(UUID index) throws SQLException {
-        List<Member> members = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection().prepareStatement(
-                        "select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
-                        "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from boards b " +
-                        "join board_member bm on b.id = bm.board_id " +
-                        "join members m on bm.member_id = m.id where b.id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            List<Member> members = new ArrayList<>();
+            PreparedStatement statement = connection.prepareStatement(
+                    "select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
+                            "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from boards b " +
+                            "join board_member bm on b.id = bm.board_id " +
+                            "join members m on bm.member_id = m.id where b.id = ?");
             statement.setObject(1, index);
 
             if (statement.execute()) {
@@ -131,8 +130,8 @@ public class BoardRepositoryImpl implements Repository<Board> {
                 while (resultSet.next())
                     members.add(memberRepository.buildMember(resultSet));
             }
-        }
-        return members;
+            return members;
+        });
     }
 
     private List<CardList> getCardLists(UUID index, Connection connection) {
@@ -154,33 +153,20 @@ public class BoardRepositoryImpl implements Repository<Board> {
 
     @Override
     public List<Board> getObjects() {
-        List<Board> boards = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("select * FROM boards")) {
+        return JdbcConfig.execute((connection) -> {
+            List<Board> boards = new ArrayList<>();
+            PreparedStatement statement = connection.prepareStatement("select * FROM boards");
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
                 while (resultSet.next())
                     boards.add(buildBoard(resultSet));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return boards;
+            return boards;
+        });
     }
 
     @Override
     public boolean delete(UUID index) {
-        boolean flag = false;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "DELETE FROM boards WHERE id = ?")) {
-            statement.setObject(1, index);
-            if (statement.executeUpdate() == 1)
-                flag = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return flag;
+        return new Helper().delete(index, "DELETE FROM boards WHERE id = ?");
     }
-
 }

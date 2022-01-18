@@ -1,10 +1,14 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Reminder;
 import com.spd.trello.repository.Repository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,9 +16,10 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
 
     @Override
     public Reminder create(Reminder obj) {
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("insert into reminders(id, created_by, created_date, starts, ends, alive, card_id) values " +
-                        "(?,?,?,?,?,?,?)")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("insert into reminders(id, created_by, created_date, starts, ends, alive, card_id) values " +
+                            "(?,?,?,?,?,?,?)");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
@@ -23,17 +28,15 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
             statement.setBoolean(6, obj.getAlive());
             statement.setObject(7, obj.getCard().getId());
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(obj.getId());
+            return obj;
+        });
     }
 
     @Override
     public Reminder update(UUID index, Reminder obj) {
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "update reminders set updated_by=?, updated_date=?, starts=?, ends=?, remind_on=?, alive=? where id=?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection.prepareStatement(
+                    "update reminders set updated_by=?, updated_date=?, starts=?, ends=?, remind_on=?, alive=? where id=?");
             statement.setString(1, obj.getUpdatedBy());
             statement.setTimestamp(2, Timestamp.valueOf(obj.getUpdatedDate()));
             statement.setTimestamp(3, Timestamp.valueOf(obj.getStart()));
@@ -42,27 +45,22 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
             statement.setBoolean(6, obj.getAlive());
             statement.setObject(7, index);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(index);
+            return obj;
+        });
     }
 
     @Override
     public Reminder findById(UUID index) {
-        Reminder reminder = new Reminder();
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("select * from reminders where id=?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("select * from reminders where id=?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
-                reminder = buildReminder(resultSet);
-
+                return buildReminder(resultSet);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return reminder;
+            throw new RuntimeException();
+        });
     }
 
     Reminder buildReminder(ResultSet resultSet) throws SQLException {

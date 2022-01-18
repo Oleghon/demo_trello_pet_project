@@ -49,7 +49,6 @@ public class AttachmentHelper {
     }
 
     public Attachment findById(UUID id) {
-        Attachment foundAttachment = null;
         try (Connection connection = JdbcConfig.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement("select * from attachments where id = ?")) {
@@ -57,12 +56,12 @@ public class AttachmentHelper {
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
                 resultSet.next();
-                foundAttachment = buildAttachment(resultSet);
+                return buildAttachment(resultSet);
             }
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return foundAttachment;
+        throw new RuntimeException();
     }
 
     private Attachment buildAttachment(ResultSet resultSet) throws SQLException, IOException {

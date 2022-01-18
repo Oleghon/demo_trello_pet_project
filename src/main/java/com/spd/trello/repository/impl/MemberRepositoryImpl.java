@@ -1,11 +1,15 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Member;
 import com.spd.trello.domain.Role;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,56 +18,47 @@ import java.util.UUID;
 public class MemberRepositoryImpl implements Repository<Member> {
     @Override
     public Member create(Member obj) {
-        Member createdMember = null;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("INSERT INTO members(id, created_by, created_date, role, user_id) " +
-                        "VALUES(?,?,?,?,?)")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("INSERT INTO members(id, created_by, created_date, role, user_id) " +
+                            "VALUES(?,?,?,?,?)");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
             statement.setString(4, String.valueOf(obj.getRole()));
             statement.setObject(5, obj.getUser().getId());
             statement.executeUpdate();
-            createdMember = findById(obj.getId());
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return createdMember;
+            return obj;
+        });
     }
 
     @Override
     public Member update(UUID index, Member obj) {
-        Member updatedMember = null;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("UPDATE members SET role = ?, updated_by = ?, updated_date = ? WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("UPDATE members SET role = ?, updated_by = ?, updated_date = ? WHERE id = ?");
             statement.setString(1, String.valueOf(obj.getRole()));
             statement.setString(2, obj.getUpdatedBy());
             statement.setObject(3, obj.getUpdatedDate());
             statement.setObject(4, index);
             statement.executeUpdate();
-            updatedMember = findById(index);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return updatedMember;
+            return obj;
+        });
     }
 
     @Override
     public Member findById(UUID index) {
-        Member foundMember = null;
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("SELECT * FROM members WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("SELECT * FROM members WHERE id = ?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    foundMember = buildMember(resultSet);
+                if (resultSet.next())
+                    return buildMember(resultSet);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return foundMember;
+            throw new RuntimeException("entity not found");
+        });
     }
 
     Member buildMember(ResultSet resultSet) throws SQLException {
@@ -81,7 +76,6 @@ public class MemberRepositoryImpl implements Repository<Member> {
         return member;
     }
 
-
     @Override
     public boolean delete(UUID index) {
         return new Helper().delete(index, "DELETE FROM members WHERE id = ?");
@@ -89,17 +83,16 @@ public class MemberRepositoryImpl implements Repository<Member> {
 
     @Override
     public List<Member> getObjects() {
-        List<Member> members = new ArrayList<>();
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("SELECT * FROM members")) {
+        return JdbcConfig.execute((connection) -> {
+            List<Member> members = new ArrayList<>();
+            PreparedStatement statement = connection
+                    .prepareStatement("SELECT * FROM members");
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
                 while (resultSet.next())
                     members.add(buildMember(resultSet));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return members;
+            return members;
+        });
     }
 }

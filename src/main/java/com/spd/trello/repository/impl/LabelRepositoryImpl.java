@@ -1,5 +1,6 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Label;
 import com.spd.trello.repository.Repository;
 
@@ -14,50 +15,39 @@ public class LabelRepositoryImpl implements Repository<Label> {
 
     @Override
     public Label create(Label obj) {
-        Label addedLabel = new Label();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("INSERT INTO labels(id, created_date, color_name) VALUES(?, ?, ?);")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO labels(id, created_date, color_name) VALUES(?, ?, ?);");
             statement.setObject(1, obj.getId());
             statement.setObject(2, obj.getCreatedDate());
             statement.setString(3, obj.getColorName());
             statement.executeUpdate();
-            addedLabel = findById(obj.getId());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return addedLabel;
+            return obj;
+        });
     }
 
     @Override
     public Label update(UUID index, Label obj) {
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("UPDATE labels " +
-                        "SET updated_date = ?," +
-                        "color_name = ? " +
-                        "WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("UPDATE labels SET updated_date = ?, color_name = ? WHERE id = ?");
             statement.setObject(1, obj.getUpdatedDate());
             statement.setString(2, obj.getColorName());
             statement.setObject(3, index);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return obj;
+            return obj;
+        });
     }
 
     @Override
     public Label findById(UUID index) {
-        Label label = new Label();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("SELECT * FROM labels WHERE id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM labels WHERE id = ?");
             statement.setObject(1, index);
             ResultSet resultSet = statement.executeQuery();
-            resultSet.next();
-            buildLabel(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return label;
+            if (resultSet.next())
+                return buildLabel(resultSet);
+            throw new RuntimeException();
+        });
     }
 
     Label buildLabel(ResultSet resultSet) throws SQLException {
@@ -70,22 +60,20 @@ public class LabelRepositoryImpl implements Repository<Label> {
 
     @Override
     public List<Label> getObjects() {
-        List<Label> labels = new ArrayList<>();
-        try (PreparedStatement statement = config.getConnection()
-                .prepareStatement("SELECT * FROM labels")) {
+        return JdbcConfig.execute((connection) -> {
+            List<Label> labels = new ArrayList<>();
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM labels");
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
                 while (resultSet.next())
                     labels.add(buildLabel(resultSet));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return labels;
+            return labels;
+        });
     }
 
     @Override
     public boolean delete(UUID index) {
-        return new Repository.Helper().delete(index,"DELETE FROM labels WHERE id = ?");
+        return new Repository.Helper().delete(index, "DELETE FROM labels WHERE id = ?");
     }
 }
