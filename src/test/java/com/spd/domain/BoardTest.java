@@ -23,12 +23,14 @@ public class BoardTest extends BaseTest{
     @BeforeEach
     public void createTestBoard() {
         board.setId(UUID.randomUUID());
+        board.setWorkSpace(workSpace);
         board = boardService.create(board);
     }
 
     @Test
     public void successCreate() {
         board.setId(UUID.randomUUID());
+        board.setWorkSpace(workSpace);
         Board actual = boardService.create(board);
         assertAll(
                 () -> assertNotNull(actual.getCreatedDate()),
@@ -44,7 +46,7 @@ public class BoardTest extends BaseTest{
 
     @Test
     public void successFindById(){
-        Board actual = boardService.readById(BaseTest.board.getId());
+        Board actual = boardService.readById(board.getId());
         assertAll(
                 () -> assertNotNull(actual.getCreatedDate()),
                 () -> assertNull(actual.getUpdatedDate()),

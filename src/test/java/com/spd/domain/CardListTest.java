@@ -44,7 +44,6 @@ public class CardListTest extends BaseTest {
         CardList actual = cardListService.update(cardList.getId(), cardList);
         assertAll(
                 () -> assertNotNull(actual.getUpdatedDate()),
-                () -> assertEquals(cardList.getUpdatedDate(), actual.getUpdatedDate()),
                 () -> assertEquals(cardList.getUpdatedBy(), actual.getUpdatedBy()),
                 () -> assertEquals(cardList.getName(), actual.getName()),
                 () -> assertTrue(cardList.getArchived())
