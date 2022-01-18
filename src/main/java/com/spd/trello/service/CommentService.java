@@ -27,13 +27,15 @@ public class CommentService extends AbstractService<Comment> {
 
     @Override
     public Comment create(Comment obj) {
-        return commentRepository.create(obj);
+        commentRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public Comment update(UUID id, Comment obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return commentRepository.update(id, obj);
+        commentRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override

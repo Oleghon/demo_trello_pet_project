@@ -13,6 +13,7 @@ import java.util.Properties;
 
 public class JdbcConfig {
 
+    private static HikariConfig hikari;
     private static DataSource dataSource;
 
     static {
@@ -21,19 +22,9 @@ public class JdbcConfig {
         flyway.migrate();
     }
 
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
-    }
-
-    public static void createDataSource() {
-        Properties properties = null;
-        try {
-            properties = loadProperties();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        HikariConfig hikari = new HikariConfig();
-
+    private static void createDataSource() {
+        Properties properties = loadProperties();
+        hikari = new HikariConfig();
         hikari.setJdbcUrl(properties.getProperty("jdbc.url"));
         hikari.setUsername(properties.getProperty("jdbc.username"));
         hikari.setPassword(properties.getProperty("jdbc.password"));
@@ -41,16 +32,32 @@ public class JdbcConfig {
         dataSource = new HikariDataSource(hikari);
     }
 
-    public static Flyway createFlyway(DataSource dataSource) {
+    private static Flyway createFlyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
                 .load();
     }
 
-    public static Properties loadProperties() throws IOException {
+    private static Properties loadProperties() {
         InputStream resourceAsStream = JdbcConfig.class.getClassLoader().getResourceAsStream("application.properties");
-        Properties properties = new Properties();
-        properties.load(resourceAsStream);
-        return properties;
+        try {
+            Properties properties = new Properties();
+            properties.load(resourceAsStream);
+            return properties;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("property-file not found;" + e);
+        }
+    }
+
+    public static <T> T execute(ConnectionCallback<T> callback) {
+        try (Connection connection = dataSource.getConnection()) {
+            return callback.doInConnection(connection);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Error during execution.", e);
+        }
+    }
+
+    public interface ConnectionCallback<T> {
+        T doInConnection(Connection conn) throws SQLException;
     }
 }

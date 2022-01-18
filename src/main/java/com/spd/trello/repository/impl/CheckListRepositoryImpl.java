@@ -1,5 +1,6 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.CheckList;
 import com.spd.trello.domain.CheckableItem;
@@ -16,55 +17,49 @@ public class CheckListRepositoryImpl implements Repository<CheckList> {
 
     @Override
     public CheckList create(CheckList obj) {
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("insert into checklists(id, created_by, created_date, name, card_id)" +
-                             "values (?,?,?,?,?)")) {
+       return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("insert into checklists(id, created_by, created_date, name, card_id)" +
+                            "values (?,?,?,?,?)");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
             statement.setString(4, obj.getName());
             statement.setObject(5, obj.getCard().getId());
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(obj.getId());
+            return obj;
+        });
     }
 
     @Override
     public CheckList update(UUID index, CheckList obj) {
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("update checklists set updated_by=?, updated_date=?, name=? where id=?")) {
+       return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("update checklists set updated_by=?, updated_date=?, name=? where id=?");
             statement.setString(1, obj.getUpdatedBy());
             statement.setObject(2, obj.getUpdatedDate());
             statement.setString(3, obj.getName());
             statement.setObject(4, index);
             statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(index);
+            return obj;
+        });
     }
 
     @Override
     public CheckList findById(UUID index) {
-        CheckList checkList = null;
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("select * from checklists where id = ?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("select * from checklists where id = ?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.getResultSet();
                 resultSet.next();
-                checkList = buildCheckList(resultSet);
+                CheckList checkList = buildCheckList(resultSet);
                 checkList.setItems(getItems(checkList.getId(), connection));
+                return checkList;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return checkList;
+            throw new RuntimeException();
+        });
     }
 
     private List<CheckableItem> getItems(UUID id, Connection connection) throws SQLException {

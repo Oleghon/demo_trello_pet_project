@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class ReminderService extends AbstractService<Reminder>{
+public class ReminderService extends AbstractService<Reminder> {
 
     ReminderRepositoryImpl reminderRepository;
 
@@ -17,13 +17,15 @@ public class ReminderService extends AbstractService<Reminder>{
 
     @Override
     public Reminder create(Reminder obj) {
-        return reminderRepository.create(obj);
+        reminderRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public Reminder update(UUID id, Reminder obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return reminderRepository.update(id, obj);
+        reminderRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.spd.trello.repository.impl;
 
+import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.*;
 import com.spd.trello.repository.Repository;
 
@@ -25,10 +26,10 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     @Override
     public Card create(Card obj) {
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("insert into cards(id, created_by, created_date, name, description, archived, cardlist_id)" +
-                             "values (?,?,?,?,?,?,?)")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("insert into cards(id, created_by, created_date, name, description, archived, cardlist_id)" +
+                            "values (?,?,?,?,?,?,?)");
             statement.setObject(1, obj.getId());
             statement.setString(2, obj.getCreatedBy());
             statement.setObject(3, obj.getCreatedDate());
@@ -38,10 +39,8 @@ public class CardRepositoryImpl implements Repository<Card> {
             statement.setObject(7, obj.getCardList().getId());
             statement.executeUpdate();
             addMemberRelations(obj, connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(obj.getId());
+            return obj;
+        });
     }
 
     private void addMemberRelations(Card obj, Connection connection) throws SQLException {
@@ -57,9 +56,9 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     @Override
     public Card update(UUID index, Card obj) {
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("update cards set updated_by=?, updated_date=?, name=?, description=?, archived=?, cardlist_id=? where id=?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("update cards set updated_by=?, updated_date=?, name=?, description=?, archived=?, cardlist_id=? where id=?");
             statement.setString(1, obj.getUpdatedBy());
             statement.setObject(2, obj.getUpdatedDate());
             statement.setString(3, obj.getName());
@@ -73,10 +72,8 @@ public class CardRepositoryImpl implements Repository<Card> {
                 System.out.println(obj.getAssignedMembers());
                 addMemberRelations(obj, connection);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return findById(index);
+            return obj;
+        });
     }
 
     public List<Member> checkNewRelations(Card card) throws SQLException {
@@ -88,10 +85,9 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     @Override
     public Card findById(UUID index) {
-
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("select * from cards where id=?")) {
+        return JdbcConfig.execute((connection) -> {
+            PreparedStatement statement = connection
+                    .prepareStatement("select * from cards where id=?");
             statement.setObject(1, index);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
@@ -103,10 +99,8 @@ public class CardRepositoryImpl implements Repository<Card> {
                 foundCard.setCheckList(getCheckListsForCard(index, connection));
                 return foundCard;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        throw new RuntimeException("Entity card not found by id: " + index);
+            throw new RuntimeException("Entity card not found by id: " + index);
+        });
     }
 
     Card buildCard(ResultSet resultSet) throws SQLException {
@@ -127,13 +121,14 @@ public class CardRepositoryImpl implements Repository<Card> {
         return card;
     }
 
-    private List<Member> getMembersForCard(UUID index) throws SQLException {
-        List<Member> members = new ArrayList<>();
-        try (Connection connection = config.getConnection(); PreparedStatement statement = connection
-                .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
-                        "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from cards c " +
-                        "join card_member cm on cm.card_id = c.id " +
-                        "join members m on cm.member_id = m.id where c.id = ?")) {
+    private List<Member> getMembersForCard(UUID index) {
+        return JdbcConfig.execute((connection) -> {
+            List<Member> members = new ArrayList<>();
+            PreparedStatement statement = connection
+                    .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, " +
+                            "m.created_date as created_date, m.updated_date as updated_date, m.role as role, m.user_id as user_id from cards c " +
+                            "join card_member cm on cm.card_id = c.id " +
+                            "join members m on cm.member_id = m.id where c.id = ?");
             statement.setObject(1, index);
 
             if (statement.execute()) {
@@ -141,8 +136,8 @@ public class CardRepositoryImpl implements Repository<Card> {
                 while (resultSet.next())
                     members.add(memberRepository.buildMember(resultSet));
             }
-        }
-        return members;
+            return members;
+        });
     }
 
     private List<Comment> getCommentsForCard(UUID uuid, Connection connection) throws SQLException {
@@ -180,8 +175,8 @@ public class CardRepositoryImpl implements Repository<Card> {
             statement.setObject(1, uuid);
             if (statement.execute()) {
                 ResultSet resultSet = statement.executeQuery();
-                resultSet.next();
-                reminder = reminderRepository.buildReminder(resultSet);
+                if (resultSet.next())
+                    reminder = reminderRepository.buildReminder(resultSet);
             }
         }
         return reminder;
@@ -194,16 +189,14 @@ public class CardRepositoryImpl implements Repository<Card> {
 
     @Override
     public List<Card> getObjects() {
-        List<Card> cards = new ArrayList<>();
-        try (Connection connection = config.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement("select * from cards")) {
+        return JdbcConfig.execute((connection) -> {
+            List<Card> cards = new ArrayList<>();
+            PreparedStatement statement = connection
+                    .prepareStatement("select * from cards");
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next())
                 cards.add(buildCard(resultSet));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return cards;
+            return cards;
+        });
     }
 }
