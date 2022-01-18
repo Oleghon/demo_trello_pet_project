@@ -17,13 +17,15 @@ public class LabelService extends AbstractService<Label> {
 
     @Override
     public Label create(Label obj) {
-        return labelRepository.create(obj);
+        labelRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public Label update(UUID id, Label obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return labelRepository.update(id, obj);
+        labelRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override

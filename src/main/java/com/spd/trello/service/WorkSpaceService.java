@@ -33,13 +33,15 @@ public class WorkSpaceService extends AbstractService<WorkSpace> {
 
     @Override
     public WorkSpace create(WorkSpace obj) {
-        return repository.create(obj);
+        repository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public WorkSpace update(UUID id, WorkSpace obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return repository.update(id, obj);
+        repository.update(id, obj);
+        return readById(id);
     }
 
     @Override

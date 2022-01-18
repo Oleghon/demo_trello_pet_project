@@ -27,13 +27,15 @@ public class UserService extends AbstractService<User> {
 
     @Override
     public User create(User obj) {
-        return userRepository.create(obj);
+        userRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public User update(UUID id, User obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return userRepository.update(id, obj);
+        userRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override

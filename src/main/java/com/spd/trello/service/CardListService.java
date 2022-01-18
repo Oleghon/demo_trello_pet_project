@@ -27,13 +27,15 @@ public class CardListService extends AbstractService<CardList> {
 
     @Override
     public CardList create(CardList obj) {
-        return cardListRepository.create(obj);
+        cardListRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public CardList update(UUID id, CardList obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return cardListRepository.update(id, obj);
+        cardListRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class CardListService extends AbstractService<CardList> {
 
     @Override
     public boolean delete(UUID id) {
-       return cardListRepository.delete(id);
+        return cardListRepository.delete(id);
     }
 
     @Override

@@ -16,13 +16,15 @@ public class CheckListService extends AbstractService<CheckList> {
 
     @Override
     public CheckList create(CheckList obj) {
-        return checkListRepository.create(obj);
+        checkListRepository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public CheckList update(UUID id, CheckList obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return checkListRepository.update(id, obj);
+        checkListRepository.update(id, obj);
+        return readById(id);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class MemberService extends AbstractService<Member>{
+public class MemberService extends AbstractService<Member> {
 
     private MemberRepositoryImpl repository;
 
@@ -17,8 +17,8 @@ public class MemberService extends AbstractService<Member>{
         repository = new MemberRepositoryImpl();
     }
 
-    public Member create(User user, Role role, String createdBy){
-        Member member =new Member();
+    public Member create(User user, Role role, String createdBy) {
+        Member member = new Member();
         member.setCreatedBy(createdBy);
         member.setUser(user);
         member.setRole(role);
@@ -27,13 +27,15 @@ public class MemberService extends AbstractService<Member>{
 
     @Override
     public Member create(Member obj) {
-        return repository.create(obj);
+        repository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public Member update(UUID id, Member obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return repository.update(id, obj);
+        repository.update(id, obj);
+        return readById(id);
     }
 
     @Override

@@ -18,13 +18,15 @@ public class BoardService extends AbstractService<Board> {
 
     @Override
     public Board create(Board obj) {
-        return repository.create(obj);
+        repository.create(obj);
+        return readById(obj.getId());
     }
 
     @Override
     public Board update(UUID id, Board obj) {
         obj.setUpdatedDate(LocalDateTime.now());
-        return repository.update(id, obj);
+        repository.update(id, obj);
+        return readById(id);
     }
 
     @Override
