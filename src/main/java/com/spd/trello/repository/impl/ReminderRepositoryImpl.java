@@ -1,69 +1,23 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Reminder;
 import com.spd.trello.repository.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class ReminderRepositoryImpl implements Repository<Reminder> {
 
-    @Override
-    public Reminder create(Reminder obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("insert into reminders(id, created_by, created_date, starts, ends, alive, card_id) values " +
-                            "(?,?,?,?,?,?,?)");
-            statement.setObject(1, obj.getId());
-            statement.setString(2, obj.getCreatedBy());
-            statement.setObject(3, obj.getCreatedDate());
-            statement.setObject(4, obj.getStart());
-            statement.setObject(5, obj.getEnd());
-            statement.setBoolean(6, obj.getAlive());
-            statement.setObject(7, obj.getCard().getId());
-            statement.executeUpdate();
-            return obj;
-        });
-    }
-
-    @Override
-    public Reminder update(UUID index, Reminder obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection.prepareStatement(
-                    "update reminders set updated_by=?, updated_date=?, starts=?, ends=?, remind_on=?, alive=? where id=?");
-            statement.setString(1, obj.getUpdatedBy());
-            statement.setTimestamp(2, Timestamp.valueOf(obj.getUpdatedDate()));
-            statement.setTimestamp(3, Timestamp.valueOf(obj.getStart()));
-            statement.setTimestamp(4, Timestamp.valueOf(obj.getEnd()));
-            statement.setTimestamp(5, Timestamp.valueOf(obj.getRemindOn()));
-            statement.setBoolean(6, obj.getAlive());
-            statement.setObject(7, index);
-            statement.executeUpdate();
-            return obj;
-        });
-    }
-
-    @Override
-    public Reminder findById(UUID index) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("select * from reminders where id=?");
-            statement.setObject(1, index);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.executeQuery();
-                return buildReminder(resultSet);
-            }
-            throw new RuntimeException();
-        });
-    }
-
-    Reminder buildReminder(ResultSet resultSet) throws SQLException {
+    private final JdbcTemplate jdbcTemplate;
+    public RowMapper<Reminder> reminderMapper = (ResultSet resultSet, int rowNum) -> {
         Reminder reminder = new Reminder();
         Card card = new Card();
         reminder.setId(UUID.fromString(resultSet.getString("id")));
@@ -79,10 +33,47 @@ public class ReminderRepositoryImpl implements Repository<Reminder> {
         card.setId(UUID.fromString(resultSet.getString("card_id")));
         reminder.setCard(card);
         return reminder;
+    };
+
+    @Autowired
+    public ReminderRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public Reminder create(Reminder obj) {
+        jdbcTemplate.update("insert into reminders(id, created_by, created_date, starts, ends, alive, card_id) values " +
+                        "(?,?,?,?,?,?,?)",
+                obj.getId(),
+                obj.getCreatedBy(),
+                obj.getCreatedDate(),
+                obj.getStart(),
+                obj.getEnd(),
+                obj.getAlive(),
+                obj.getCard().getId());
+        return obj;
+    }
+
+    @Override
+    public Reminder update(UUID index, Reminder obj) {
+        jdbcTemplate.update("update reminders set updated_by=?, updated_date=?, starts=?, ends=?, remind_on=?, alive=? where id=?",
+                obj.getUpdatedBy(),
+                Timestamp.valueOf(obj.getUpdatedDate()),
+                Timestamp.valueOf(obj.getStart()),
+                Timestamp.valueOf(obj.getEnd()),
+                Timestamp.valueOf(obj.getRemindOn()),
+                obj.getAlive(),
+                index);
+        return obj;
+    }
+
+    @Override
+    public Reminder findById(UUID index) {
+        return jdbcTemplate.queryForObject("select * from reminders where id=?", reminderMapper, index);
     }
 
     @Override
     public boolean delete(UUID index) {
-        return new Helper().delete(index, "DELETE FROM reminders WHERE id = ?");
+        return jdbcTemplate.update("DELETE FROM reminders WHERE id = ?", index) == 1;
     }
 }

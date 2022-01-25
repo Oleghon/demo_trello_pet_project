@@ -1,64 +1,23 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Comment;
 import com.spd.trello.repository.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class CommentRepositoryImpl implements Repository<Comment> {
-    @Override
-    public Comment create(Comment obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("insert into comments(id, created_by, created_date, text, card_id)" +
-                            "values (?,?,?,?,?)");
-            statement.setObject(1, obj.getId());
-            statement.setString(2, obj.getCreatedBy());
-            statement.setObject(3, obj.getCreatedDate());
-            statement.setString(4, obj.getText());
-            statement.setObject(5, obj.getCard().getId());
-            statement.executeUpdate();
-            return obj;
-        });
-    }
 
-    @Override
-    public Comment update(UUID index, Comment obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("update comments set updated_by=?, updated_date=?, text=? where id=?");
-            statement.setString(1, obj.getUpdatedBy());
-            statement.setObject(2, obj.getUpdatedDate());
-            statement.setString(3, obj.getText());
-            statement.setObject(4, index);
-            statement.executeUpdate();
-            return obj;
-        });
-    }
-
-    @Override
-    public Comment findById(UUID index) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("select * from comments where id = ?");
-            statement.setObject(1, index);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                resultSet.next();
-                return buildComment(resultSet);
-            }
-            throw new RuntimeException();
-        });
-    }
-
-    Comment buildComment(ResultSet resultSet) throws SQLException {
+    private final JdbcTemplate jdbcTemplate;
+    RowMapper<Comment> commentMapper = (ResultSet resultSet, int rowNum) -> {
         Comment comment = new Comment();
         Card fk = new Card();
         comment.setId(UUID.fromString(resultSet.getString("id")));
@@ -71,10 +30,41 @@ public class CommentRepositoryImpl implements Repository<Comment> {
         fk.setId(UUID.fromString(resultSet.getString("card_id")));
         comment.setCard(fk);
         return comment;
+    };
+
+    @Autowired
+    public CommentRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public Comment create(Comment obj) {
+        jdbcTemplate.update("insert into comments(id, created_by, created_date, text, card_id)" +
+                        "values (?,?,?,?,?)", obj.getId(),
+                obj.getCreatedBy(),
+                obj.getCreatedDate(),
+                obj.getText(),
+                obj.getCard().getId());
+        return obj;
+    }
+
+    @Override
+    public Comment update(UUID index, Comment obj) {
+        jdbcTemplate.update("update comments set updated_by=?, updated_date=?, text=? where id=?",
+                obj.getUpdatedBy(),
+                obj.getUpdatedDate(),
+                obj.getText(),
+                index);
+        return obj;
+    }
+
+    @Override
+    public Comment findById(UUID index) {
+        return jdbcTemplate.queryForObject("select * from comments where id = ?", commentMapper, index);
     }
 
     @Override
     public boolean delete(UUID index) {
-        return new Repository.Helper().delete(index, "delete from comments where id=?");
+        return jdbcTemplate.update("delete from comments where id=?", index) == 1;
     }
 }

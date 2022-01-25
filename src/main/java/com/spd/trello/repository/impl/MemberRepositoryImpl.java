@@ -1,64 +1,62 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Member;
 import com.spd.trello.domain.Role;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class MemberRepositoryImpl implements Repository<Member> {
+
+    private final JdbcTemplate jdbcTemplate;
+    final RowMapper<Member> memberMapper = (ResultSet resultSet, int rowNum) -> {
+        Member member = new Member();
+        User user = new User();
+        member.setId(UUID.fromString(resultSet.getString("id")));
+        member.setCreatedBy(resultSet.getString("created_by"));
+        member.setCreatedDate(resultSet.getTimestamp("created_date").toLocalDateTime());
+        member.setUpdatedBy(resultSet.getString("updated_by"));
+        member.setUpdatedDate(Optional.ofNullable(resultSet.getTimestamp("updated_date"))
+                .map(Timestamp::toLocalDateTime).orElse(null));
+        member.setRole(Role.valueOf(resultSet.getString("role")));
+        user.setId(UUID.fromString(resultSet.getString("user_id")));
+        member.setUser(user);
+        return member;
+    };
+
+    @Autowired
+    public MemberRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @Override
     public Member create(Member obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("INSERT INTO members(id, created_by, created_date, role, user_id) " +
-                            "VALUES(?,?,?,?,?)");
-            statement.setObject(1, obj.getId());
-            statement.setString(2, obj.getCreatedBy());
-            statement.setObject(3, obj.getCreatedDate());
-            statement.setString(4, String.valueOf(obj.getRole()));
-            statement.setObject(5, obj.getUser().getId());
-            statement.executeUpdate();
-            return obj;
-        });
+        jdbcTemplate.update("INSERT INTO members(id, created_by, created_date, role, user_id) VALUES(?,?,?,?,?)",
+                obj.getId(), obj.getCreatedBy(), obj.getCreatedDate(), String.valueOf(obj.getRole()), obj.getUser().getId());
+        return obj;
     }
 
     @Override
     public Member update(UUID index, Member obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("UPDATE members SET role = ?, updated_by = ?, updated_date = ? WHERE id = ?");
-            statement.setString(1, String.valueOf(obj.getRole()));
-            statement.setString(2, obj.getUpdatedBy());
-            statement.setObject(3, obj.getUpdatedDate());
-            statement.setObject(4, index);
-            statement.executeUpdate();
-            return obj;
-        });
+        jdbcTemplate.update("UPDATE members SET role = ?, updated_by = ?, updated_date = ? WHERE id = ?",
+                String.valueOf(obj.getRole()), obj.getUpdatedBy(), obj.getUpdatedDate(), index);
+        return obj;
     }
 
     @Override
     public Member findById(UUID index) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("SELECT * FROM members WHERE id = ?");
-            statement.setObject(1, index);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                if (resultSet.next())
-                    return buildMember(resultSet);
-            }
-            throw new RuntimeException("entity not found");
-        });
+        return jdbcTemplate.queryForObject("SELECT * FROM members WHERE id = ?", memberMapper, index);
     }
 
     Member buildMember(ResultSet resultSet) throws SQLException {
@@ -76,23 +74,17 @@ public class MemberRepositoryImpl implements Repository<Member> {
         return member;
     }
 
+    List<Member> getMembers(String sql, UUID id) {
+        return jdbcTemplate.query(sql, memberMapper, id);
+    }
+
     @Override
     public boolean delete(UUID index) {
-        return new Helper().delete(index, "DELETE FROM members WHERE id = ?");
+        return jdbcTemplate.update("DELETE FROM members WHERE id = ?", index) == 1;
     }
 
     @Override
     public List<Member> getObjects() {
-        return JdbcConfig.execute((connection) -> {
-            List<Member> members = new ArrayList<>();
-            PreparedStatement statement = connection
-                    .prepareStatement("SELECT * FROM members");
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    members.add(buildMember(resultSet));
-            }
-            return members;
-        });
+        return jdbcTemplate.query("Select * from members", memberMapper);
     }
 }

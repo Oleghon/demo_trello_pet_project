@@ -1,104 +1,28 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Board;
 import com.spd.trello.domain.Member;
 import com.spd.trello.domain.WorkSpace;
 import com.spd.trello.domain.WorkSpaceVisibility;
 import com.spd.trello.repository.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
 
     private final MemberRepositoryImpl memberRepository;
     private final BoardRepositoryImpl boardRepository;
-
-    public WorkSpaceRepositoryImpl() {
-        memberRepository = new MemberRepositoryImpl();
-        boardRepository = new BoardRepositoryImpl();
-    }
-
-    @Override
-    public WorkSpace create(WorkSpace obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement =
-                    connection.prepareStatement("INSERT INTO workspaces(id, created_by, created_date, name, description, visibility) " +
-                            "VALUES(?,?,?,?,?,?)");
-            statement.setObject(1, obj.getId());
-            statement.setString(2, obj.getCreatedBy());
-            statement.setObject(3, obj.getCreatedDate());
-            statement.setString(4, obj.getName());
-            statement.setString(5, obj.getDescription());
-            statement.setString(6, String.valueOf(obj.getVisibility()));
-            statement.executeUpdate();
-            addMemberRelations(obj, connection);
-            return obj;
-        });
-    }
-
-    private void addMemberRelations(WorkSpace workSpace, Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection
-                .prepareStatement("INSERT INTO space_member(space_id, member_id) VALUES (?,?)")) {
-
-            for (Member member : workSpace.getWorkspaceMembers()) {
-                statement.setObject(1, workSpace.getId());
-                statement.setObject(2, member.getId());
-                statement.executeUpdate();
-            }
-        }
-    }
-
-    @Override
-    public WorkSpace update(UUID index, WorkSpace obj) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement =
-                    connection.prepareStatement("UPDATE workspaces SET updated_by=?, updated_date=?, name=?, description=?, visibility=? where id=?");
-            statement.setString(1, obj.getUpdatedBy());
-            statement.setObject(2, obj.getUpdatedDate());
-            statement.setString(3, obj.getName());
-            statement.setString(4, obj.getDescription());
-            statement.setString(5, String.valueOf(obj.getVisibility()));
-            statement.setObject(6, index);
-            statement.executeUpdate();
-            obj.setWorkspaceMembers(checkNewRelations(obj));
-            if (!obj.getWorkspaceMembers().isEmpty())
-                addMemberRelations(obj, connection);
-            return obj;
-        });
-    }
-
-    public List<Member> checkNewRelations(WorkSpace workSpace) throws SQLException {
-        List<Member> members = workSpace.getWorkspaceMembers();
-        List<Member> removedMembers = getMembersForWorkSpace(workSpace.getId());
-        members.removeAll(removedMembers);
-        return members;
-    }
-
-    @Override
-    public WorkSpace findById(UUID index) {
-        return JdbcConfig.execute((connection) -> {
-            WorkSpace foundSpace = null;
-            PreparedStatement statement = connection
-                    .prepareStatement("select * from workspaces where id = ?");
-            statement.setObject(1, index);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                resultSet.next();
-                foundSpace = buildWorkSpace(resultSet);
-                foundSpace.setWorkspaceMembers(getMembersForWorkSpace(index));
-                foundSpace.setBoardList(getBoardsForWorkSpace(index));
-                return foundSpace;
-            }
-            throw new RuntimeException("entity not found");
-        });
-    }
-
-    WorkSpace buildWorkSpace(ResultSet resultSet) throws SQLException {
+    private final JdbcTemplate jdbcTemplate;
+    RowMapper<WorkSpace> spaceMapper = (ResultSet resultSet, int rowNum) -> {
         WorkSpace workSpace = new WorkSpace();
         workSpace.setId(UUID.fromString(resultSet.getString("id")));
         workSpace.setCreatedBy(resultSet.getString("created_by"));
@@ -110,58 +34,82 @@ public class WorkSpaceRepositoryImpl implements Repository<WorkSpace> {
         workSpace.setName(resultSet.getString("name"));
         workSpace.setDescription(resultSet.getString("description"));
         return workSpace;
+    };
+
+    @Autowired
+    public WorkSpaceRepositoryImpl(MemberRepositoryImpl memberRepository, BoardRepositoryImpl boardRepository, JdbcTemplate jdbcTemplate) {
+        this.memberRepository = memberRepository;
+        this.boardRepository = boardRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Member> getMembersForWorkSpace(UUID spaceId) throws SQLException {
-        return JdbcConfig.execute((connection) -> {
-            List<Member> members = new ArrayList<>();
-            PreparedStatement statement = connection
-                    .prepareStatement("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, m.updated_date as updated_date, m.created_date as created_date, m.role as role, m.user_id as user_id " +
-                            "from workspaces w join space_member sm on w.id = sm.space_id join members m on m.id=sm.member_id where w.id = ?");
-            statement.setObject(1, spaceId);
-
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    members.add(memberRepository.buildMember(resultSet));
-            }
-            return members;
-        });
+    @Override
+    public WorkSpace create(WorkSpace obj) {
+        jdbcTemplate.update("INSERT INTO workspaces(id, created_by, created_date, name, description, visibility) VALUES(?,?,?,?,?,?)",
+                obj.getId(),
+                obj.getCreatedBy(),
+                obj.getCreatedDate(),
+                obj.getName(),
+                obj.getDescription(),
+                String.valueOf(obj.getVisibility()));
+        addMemberRelations(obj);
+        return obj;
     }
 
-    private List<Board> getBoardsForWorkSpace(UUID spaceId) throws SQLException {
-        return JdbcConfig.execute((connection) -> {
-            List<Board> boards = new ArrayList<>();
-            PreparedStatement statement = connection
-                    .prepareStatement("select * from boards where workspace_id = ?");
-            statement.setObject(1, spaceId);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    boards.add(boardRepository.buildBoard(resultSet));
-            }
-            return boards;
-        });
+    private void addMemberRelations(WorkSpace workSpace) {
+        for (Member member : workSpace.getWorkspaceMembers()) {
+            jdbcTemplate.update("INSERT INTO space_member(space_id, member_id) VALUES (?,?)",
+                    workSpace.getId(),
+                    member.getId());
+        }
+    }
+
+    @Override
+    public WorkSpace update(UUID index, WorkSpace obj) {
+        jdbcTemplate.update("UPDATE workspaces SET updated_by=?, updated_date=?, name=?, description=?, visibility=? where id=?",
+                obj.getUpdatedBy(),
+                obj.getUpdatedDate(),
+                obj.getName(),
+                obj.getDescription(),
+                String.valueOf(obj.getVisibility()),
+                index);
+        obj.setWorkspaceMembers(checkNewRelations(obj));
+        if (!obj.getWorkspaceMembers().isEmpty())
+            addMemberRelations(obj);
+        return obj;
+    }
+
+    public List<Member> checkNewRelations(WorkSpace workSpace) {
+        List<Member> members = workSpace.getWorkspaceMembers();
+        List<Member> removedMembers = getMembersForWorkSpace(workSpace.getId());
+        members.removeAll(removedMembers);
+        return members;
+    }
+
+    @Override
+    public WorkSpace findById(UUID index) {
+        WorkSpace workSpace = jdbcTemplate.queryForObject("select * from workspaces where id = ?", spaceMapper, index);
+        workSpace.setWorkspaceMembers(getMembersForWorkSpace(index));
+        workSpace.setBoardList(getBoardsForWorkSpace(index));
+        return workSpace;
+    }
+
+    public List<Member> getMembersForWorkSpace(UUID spaceId) {
+        return memberRepository.getMembers("select m.id as id, m.created_by as created_by, m.updated_by as updated_by, m.updated_date as updated_date, m.created_date as created_date, m.role as role, m.user_id as user_id " +
+                "from workspaces w join space_member sm on w.id = sm.space_id join members m on m.id=sm.member_id where w.id = ?", spaceId);
+    }
+
+    private List<Board> getBoardsForWorkSpace(UUID spaceId) {
+        return jdbcTemplate.query("select * from boards where workspace_id = ?", boardRepository.boardMapper, spaceId);
     }
 
     @Override
     public boolean delete(UUID index) {
-        return new Helper().delete(index, "DELETE FROM workspaces WHERE id = ?");
-
+        return jdbcTemplate.update("DELETE FROM workspaces WHERE id = ?", index) == 1;
     }
 
     @Override
     public List<WorkSpace> getObjects() {
-        return JdbcConfig.execute((connection) -> {
-            List<WorkSpace> workSpaces = new ArrayList<>();
-            PreparedStatement statement = connection
-                    .prepareStatement("select * FROM workspaces");
-            if (statement.execute()) {
-                ResultSet resultSet = statement.getResultSet();
-                while (resultSet.next())
-                    workSpaces.add(buildWorkSpace(resultSet));
-            }
-            return workSpaces;
-        });
+        return jdbcTemplate.query("select * FROM workspaces", spaceMapper);
     }
 }

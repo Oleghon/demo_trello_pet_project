@@ -1,65 +1,24 @@
 package com.spd.trello.repository.impl.helper;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Attachment;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Comment;
-import com.spd.trello.repository.Repository;
+import com.spd.trello.domain.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class AttachmentHelper {
 
-    public Attachment create(Attachment attachment, Card card) {
-        JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("insert into attachments(id, link, name, file, card_id) values (?,?,?,?,?)");
-            statement.setObject(1, attachment.getId());
-            statement.setString(2, attachment.getLink());
-            statement.setString(3, attachment.getName());
-            statement.setBytes(4, fileToByte(attachment.getFile()));
-            statement.setObject(5, card.getId());
-            statement.executeUpdate();
-            return attachment;
-        });
-        return findById(attachment.getId());
-    }
-
-    public Attachment create(Attachment attachment, Comment comment) {
-        JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("insert into attachments(id, link, name, file, comment_id) values (?,?,?,?,?)");
-            statement.setObject(1, attachment.getId());
-            statement.setString(2, attachment.getLink());
-            statement.setString(3, attachment.getName());
-            statement.setObject(4, fileToByte(attachment.getFile()));
-            statement.setObject(5, comment.getId());
-            statement.executeUpdate();
-            return attachment;
-        });
-        return findById(attachment.getId());
-    }
-
-    public Attachment findById(UUID id) {
-        return JdbcConfig.execute((connection) -> {
-            PreparedStatement statement = connection
-                    .prepareStatement("select * from attachments where id = ?");
-            statement.setObject(1, id);
-            if (statement.execute()) {
-                ResultSet resultSet = statement.executeQuery();
-                if (resultSet.next())
-                    return buildAttachment(resultSet);
-            }
-            throw new RuntimeException();
-        });
-    }
-
-    private Attachment buildAttachment(ResultSet resultSet) throws SQLException {
+    private final JdbcTemplate jdbcTemplate;
+    private RowMapper<Attachment> attachmentMapper = (ResultSet resultSet, int rowNum) -> {
         Attachment attachment = new Attachment();
         attachment.setId(UUID.fromString(resultSet.getString("id")));
         attachment.setName(resultSet.getString("name"));
@@ -80,10 +39,40 @@ public class AttachmentHelper {
             attachment.setComment(comment);
         }
         return attachment;
+    };
+
+    @Autowired
+    public AttachmentHelper(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
+    public Attachment create(Attachment attachment, Resource resource) {
+        String sql = null;
+        if (resource instanceof Card) {
+            sql = "insert into attachments(id, link, name, file, card_id) values (?,?,?,?,?)";
+        } else {
+            sql = "insert into attachments(id, link, name, file, comment_id) values (?,?,?,?,?)";
+        }
+        return create(attachment, sql, resource.getId());
+    }
+
+    private Attachment create(Attachment attachment, String sql, UUID resourceId) {
+        jdbcTemplate.update(sql,
+                attachment.getId(),
+                attachment.getLink(),
+                attachment.getName(),
+                fileToByte(attachment.getFile()),
+                resourceId);
+        return findById(attachment.getId());
+    }
+
+    public Attachment findById(UUID id) {
+        return jdbcTemplate.queryForObject("select * from attachments where id = ?", attachmentMapper, id);
+    }
+
+
     public boolean delete(UUID id) {
-        return new Repository.Helper().delete(id, "delete from attachments where id = ?");
+        return jdbcTemplate.update("delete from attachments where id = ?", id) == 1;
     }
 
     public byte[] fileToByte(File file) {
