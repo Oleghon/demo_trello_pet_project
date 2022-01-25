@@ -4,17 +4,21 @@ import com.spd.trello.domain.Member;
 import com.spd.trello.domain.Role;
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.impl.MemberRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class MemberService extends AbstractService<Member> {
 
     private MemberRepositoryImpl repository;
 
-    public MemberService() {
-        repository = new MemberRepositoryImpl();
+    @Autowired
+    public MemberService(MemberRepositoryImpl repository) {
+        this.repository = repository;
     }
 
     public Member create(User user, Role role, String createdBy) {

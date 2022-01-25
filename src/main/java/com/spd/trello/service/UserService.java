@@ -2,17 +2,21 @@ package com.spd.trello.service;
 
 import com.spd.trello.domain.User;
 import com.spd.trello.repository.impl.UserRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class UserService extends AbstractService<User> {
 
     private final UserRepositoryImpl userRepository;
 
-    public UserService() {
-        userRepository = new UserRepositoryImpl();
+    @Autowired
+    public UserService(UserRepositoryImpl userRepository) {
+        this.userRepository = userRepository;
     }
 
 

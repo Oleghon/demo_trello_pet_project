@@ -2,18 +2,21 @@ package com.spd.trello.service;
 
 import com.spd.trello.domain.Board;
 import com.spd.trello.repository.Repository;
-import com.spd.trello.repository.impl.BoardRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class BoardService extends AbstractService<Board> {
 
     private Repository<Board> repository;
 
-    public BoardService() {
-        repository = new BoardRepositoryImpl();
+    @Autowired
+    public BoardService(Repository<Board> repository) {
+        this.repository = repository;
     }
 
     @Override

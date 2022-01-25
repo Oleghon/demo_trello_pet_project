@@ -5,18 +5,21 @@ import com.spd.trello.domain.Member;
 import com.spd.trello.domain.WorkSpace;
 import com.spd.trello.domain.WorkSpaceVisibility;
 import com.spd.trello.repository.Repository;
-import com.spd.trello.repository.impl.WorkSpaceRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class WorkSpaceService extends AbstractService<WorkSpace> {
 
     private Repository<WorkSpace> repository;
 
-    public WorkSpaceService() {
-        repository = new WorkSpaceRepositoryImpl();
+    @Autowired
+    public WorkSpaceService(Repository<WorkSpace> repository) {
+        this.repository = repository;
     }
 
     public WorkSpace create(String createdBy, String name, WorkSpaceVisibility visibility,

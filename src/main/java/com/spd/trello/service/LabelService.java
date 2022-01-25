@@ -2,17 +2,21 @@ package com.spd.trello.service;
 
 import com.spd.trello.domain.Label;
 import com.spd.trello.repository.impl.LabelRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class LabelService extends AbstractService<Label> {
 
     LabelRepositoryImpl labelRepository;
 
-    public LabelService() {
-        this.labelRepository = new LabelRepositoryImpl();
+    @Autowired
+    public LabelService(LabelRepositoryImpl labelRepository) {
+        this.labelRepository = labelRepository;
     }
 
     @Override

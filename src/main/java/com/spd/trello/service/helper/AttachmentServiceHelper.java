@@ -4,15 +4,19 @@ import com.spd.trello.domain.Attachment;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Comment;
 import com.spd.trello.repository.impl.helper.AttachmentHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class AttachmentServiceHelper {
 
     AttachmentHelper helper;
 
-    public AttachmentServiceHelper() {
-        this.helper = new AttachmentHelper();
+    @Autowired
+    public AttachmentServiceHelper(AttachmentHelper helper) {
+        this.helper = helper;
     }
 
     public Attachment create(Attachment attachment, Card card) {

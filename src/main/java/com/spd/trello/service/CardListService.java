@@ -3,17 +3,21 @@ package com.spd.trello.service;
 import com.spd.trello.domain.Board;
 import com.spd.trello.domain.CardList;
 import com.spd.trello.repository.impl.CardListRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class CardListService extends AbstractService<CardList> {
 
     private CardListRepositoryImpl cardListRepository;
 
-    public CardListService() {
-        cardListRepository = new CardListRepositoryImpl();
+    @Autowired
+    public CardListService(CardListRepositoryImpl cardListRepository) {
+        this.cardListRepository = cardListRepository;
     }
 
     public CardList create(String createdBy, String name, boolean arhived, Board board) {

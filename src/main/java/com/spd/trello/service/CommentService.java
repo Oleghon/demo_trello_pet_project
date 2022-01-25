@@ -3,19 +3,22 @@ package com.spd.trello.service;
 import com.spd.trello.domain.Card;
 import com.spd.trello.domain.Comment;
 import com.spd.trello.repository.impl.CommentRepositoryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class CommentService extends AbstractService<Comment> {
 
     CommentRepositoryImpl commentRepository;
 
-    public CommentService() {
-        this.commentRepository = new CommentRepositoryImpl();
+    @Autowired
+    public CommentService(CommentRepositoryImpl commentRepository) {
+        this.commentRepository = commentRepository;
     }
-
 
     public Comment create(Card card, String createdBy, String text) {
         Comment comment = new Comment();

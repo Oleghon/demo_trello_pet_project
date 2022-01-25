@@ -22,17 +22,4 @@ public interface Repository<T extends Resource> {
         return new ArrayList<>();
     }
 
-    class Helper {
-        public boolean delete(UUID id, String SQL) {
-            return JdbcConfig.execute((connection) -> {
-                PreparedStatement statement = connection
-                        .prepareStatement(SQL);
-                statement.setObject(1, id);
-                int i = statement.executeUpdate();
-                if (i == 1)
-                    return true;
-                return false;
-            });
-        }
-    }
 }
