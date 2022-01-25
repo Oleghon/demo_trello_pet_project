@@ -3,41 +3,35 @@ package com.spd.trello.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
-public class JdbcConfig {
+@Configuration
+@ComponentScan(basePackages = {"com.spd.trello.repository", "com.spd.trello.service"})
+public class JdbcConfig  {
 
-    private static HikariConfig hikari;
-    private static DataSource dataSource;
+//    private static  hikari;
 
-    static {
-        createDataSource();
-        Flyway flyway = createFlyway(dataSource);
-        flyway.migrate();
-    }
-
-    private static void createDataSource() {
+    @Bean
+    public HikariDataSource createDataSource() {
         Properties properties = loadProperties();
-        hikari = new HikariConfig();
+        HikariConfig hikari = new HikariConfig();
         hikari.setJdbcUrl(properties.getProperty("jdbc.url"));
         hikari.setUsername(properties.getProperty("jdbc.username"));
         hikari.setPassword(properties.getProperty("jdbc.password"));
         hikari.setMaximumPoolSize(Integer.parseInt(properties.getProperty("jdbc.connections")));
-        dataSource = new HikariDataSource(hikari);
+        return new HikariDataSource(hikari);
     }
 
-    private static Flyway createFlyway(DataSource dataSource) {
-        return Flyway.configure()
-                .dataSource(dataSource)
-                .load();
-    }
-
+    @Bean
     private static Properties loadProperties() {
         InputStream resourceAsStream = JdbcConfig.class.getClassLoader().getResourceAsStream("application.properties");
         try {
@@ -49,15 +43,8 @@ public class JdbcConfig {
         }
     }
 
-    public static <T> T execute(ConnectionCallback<T> callback) {
-        try (Connection connection = dataSource.getConnection()) {
-            return callback.doInConnection(connection);
-        } catch (SQLException e) {
-            throw new IllegalStateException("Error during execution.", e);
-        }
-    }
-
-    public interface ConnectionCallback<T> {
-        T doInConnection(Connection conn) throws SQLException;
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(createDataSource());
     }
 }
