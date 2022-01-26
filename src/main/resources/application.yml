@@ -1,0 +1,10 @@
+spring:
+  datasource:
+      url: jdbc:postgresql://localhost:5432/testdb
+      username: postgres
+      password: '****'
+      hikari:
+        maximum-pool-size: 10
+
+#  flyway:
+#    enabled: false
