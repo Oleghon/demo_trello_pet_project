@@ -1,10 +1,12 @@
 spring:
   datasource:
-      url: jdbc:postgresql://localhost:5432/testdb
+      url: jdbc:postgresql://localhost:5432/demo_trello
       username: postgres
       password: '****'
       hikari:
         maximum-pool-size: 10
-
+  mvc:
+      pathmatch:
+        matching-strategy: ant_path_matcher
 #  flyway:
 #    enabled: false

@@ -27,22 +27,22 @@ public class AbstractController<E extends Resource, S extends AbstractService<E>
 
     @PutMapping("/{id}")
     @Override
-    public ResponseEntity<E> update(UUID id, E resource) {
+    public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody E resource) {
         E result = service.update(id, resource);
         //todo
         return new ResponseEntity<>(result, HttpStatus.RESET_CONTENT);
     }
 
-    @GetMapping("/{id}/show")
+    @GetMapping("/{id}")
     @Override
-    public ResponseEntity<E> readById(UUID id) {
+    public ResponseEntity<E> readById(@PathVariable UUID id) {
         E result = service.readById(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @Override
-    public HttpStatus delete(UUID id) {
+    public HttpStatus delete(@PathVariable UUID id) {
         return service.delete(id) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
     }
 

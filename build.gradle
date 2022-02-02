@@ -1,13 +1,16 @@
 plugins {
     id 'java'
     id 'jacoco'
+    id 'org.springframework.boot' version '2.6.3'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+
 }
 
 jacoco {
     version = "0.8.6"
 }
 
-group 'org.example'
+group 'com.spd.trello'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -15,16 +18,18 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter:2.6.3'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.6.3'
-    implementation 'org.springframework.boot:spring-boot-starter-parent:2.6.3'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
     annotationProcessor "org.projectlombok:lombok:1.18.20"
     compileOnly "org.projectlombok:lombok:1.18.20"
     implementation 'org.flywaydb:flyway-core:8.2.2'
     implementation 'org.postgresql:postgresql:42.3.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'com.h2database:h2:2.0.206'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
 }
 

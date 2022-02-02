@@ -1,9 +1,7 @@
 package com.spd.trello.repository;
 
-import com.spd.trello.config.JdbcConfig;
 import com.spd.trello.domain.Resource;
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
