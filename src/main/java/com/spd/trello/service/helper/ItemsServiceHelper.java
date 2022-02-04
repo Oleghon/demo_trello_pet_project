@@ -1,6 +1,6 @@
 package com.spd.trello.service.helper;
 
-import com.spd.trello.domain.CheckableItem;
+import com.spd.trello.domain.items.CheckableItem;
 import com.spd.trello.repository.impl.helper.ItemsHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

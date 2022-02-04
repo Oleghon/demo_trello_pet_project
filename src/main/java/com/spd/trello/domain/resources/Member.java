@@ -1,5 +1,8 @@
-package com.spd.trello.domain;
+package com.spd.trello.domain.resources;
 
+import com.spd.trello.domain.Resource;
+import com.spd.trello.domain.enums.Role;
+import com.spd.trello.domain.resources.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

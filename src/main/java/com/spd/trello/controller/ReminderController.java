@@ -1,6 +1,6 @@
 package com.spd.trello.controller;
 
-import com.spd.trello.domain.Reminder;
+import com.spd.trello.domain.resources.Reminder;
 import com.spd.trello.service.ReminderService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

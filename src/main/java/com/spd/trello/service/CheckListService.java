@@ -1,6 +1,6 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.CheckList;
+import com.spd.trello.domain.resources.CheckList;
 import com.spd.trello.repository.impl.CheckListRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

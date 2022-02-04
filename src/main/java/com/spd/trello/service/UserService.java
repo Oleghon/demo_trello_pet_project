@@ -1,6 +1,6 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.User;
+import com.spd.trello.domain.resources.User;
 import com.spd.trello.repository.impl.UserRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

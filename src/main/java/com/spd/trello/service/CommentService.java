@@ -1,7 +1,7 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.Card;
-import com.spd.trello.domain.Comment;
+import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.Comment;
 import com.spd.trello.repository.impl.CommentRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

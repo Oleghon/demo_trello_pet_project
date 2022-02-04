@@ -1,7 +1,7 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Card;
-import com.spd.trello.domain.CheckList;
+import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.CheckList;
 import com.spd.trello.repository.Repository;
 import com.spd.trello.repository.impl.helper.ItemsHelper;
 import org.springframework.beans.factory.annotation.Autowired;

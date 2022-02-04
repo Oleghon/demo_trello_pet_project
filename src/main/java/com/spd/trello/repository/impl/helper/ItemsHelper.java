@@ -1,7 +1,7 @@
 package com.spd.trello.repository.impl.helper;
 
-import com.spd.trello.domain.CheckList;
-import com.spd.trello.domain.CheckableItem;
+import com.spd.trello.domain.resources.CheckList;
+import com.spd.trello.domain.items.CheckableItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;

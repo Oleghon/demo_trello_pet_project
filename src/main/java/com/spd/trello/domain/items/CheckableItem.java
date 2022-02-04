@@ -1,5 +1,7 @@
-package com.spd.trello.domain;
+package com.spd.trello.domain.items;
 
+import com.spd.trello.domain.Domain;
+import com.spd.trello.domain.resources.CheckList;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

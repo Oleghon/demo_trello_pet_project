@@ -1,8 +1,8 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Board;
-import com.spd.trello.domain.Card;
-import com.spd.trello.domain.CardList;
+import com.spd.trello.domain.resources.Board;
+import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.CardList;
 import com.spd.trello.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

@@ -1,8 +1,8 @@
 package com.spd.trello.repository.impl.helper;
 
-import com.spd.trello.domain.Attachment;
-import com.spd.trello.domain.Card;
-import com.spd.trello.domain.Comment;
+import com.spd.trello.domain.items.Attachment;
+import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.Comment;
 import com.spd.trello.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

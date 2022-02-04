@@ -1,9 +1,9 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Board;
-import com.spd.trello.domain.Member;
-import com.spd.trello.domain.WorkSpace;
-import com.spd.trello.domain.WorkSpaceVisibility;
+import com.spd.trello.domain.resources.Board;
+import com.spd.trello.domain.resources.Member;
+import com.spd.trello.domain.resources.WorkSpace;
+import com.spd.trello.domain.enums.WorkSpaceVisibility;
 import com.spd.trello.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

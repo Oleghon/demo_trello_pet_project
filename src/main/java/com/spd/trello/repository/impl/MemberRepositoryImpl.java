@@ -1,8 +1,8 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Member;
-import com.spd.trello.domain.Role;
-import com.spd.trello.domain.User;
+import com.spd.trello.domain.resources.Member;
+import com.spd.trello.domain.enums.Role;
+import com.spd.trello.domain.resources.User;
 import com.spd.trello.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

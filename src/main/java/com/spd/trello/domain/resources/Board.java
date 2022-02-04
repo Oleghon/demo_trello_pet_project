@@ -1,5 +1,7 @@
-package com.spd.trello.domain;
+package com.spd.trello.domain.resources;
 
+import com.spd.trello.domain.*;
+import com.spd.trello.domain.enums.BoardVisibility;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,7 +10,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Board extends Resource{
+public class Board extends Resource {
     private String name;
     private String description;
     private WorkSpace workSpace;

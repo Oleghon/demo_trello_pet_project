@@ -1,7 +1,7 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.Board;
-import com.spd.trello.domain.CardList;
+import com.spd.trello.domain.resources.Board;
+import com.spd.trello.domain.resources.CardList;
 import com.spd.trello.repository.impl.CardListRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

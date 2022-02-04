@@ -1,6 +1,6 @@
 package com.spd.trello.repository.impl;
 
-import com.spd.trello.domain.Label;
+import com.spd.trello.domain.resources.Label;
 import com.spd.trello.repository.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

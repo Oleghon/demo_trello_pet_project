@@ -1,6 +1,6 @@
 package com.spd.trello.controller;
 
-import com.spd.trello.domain.CheckList;
+import com.spd.trello.domain.resources.CheckList;
 import com.spd.trello.service.CheckListService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
