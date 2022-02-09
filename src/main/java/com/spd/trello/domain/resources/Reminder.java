@@ -1,19 +1,27 @@
 package com.spd.trello.domain.resources;
 
 import com.spd.trello.domain.Resource;
-import com.spd.trello.domain.resources.Card;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@Table(name = "reminders")
+@Entity
 public class Reminder extends Resource {
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "card_id", referencedColumnName = "id")
     private Card card;
-    private LocalDateTime start;
-    private LocalDateTime end;
-    private LocalDateTime remindOn;
+    @Column(name = "starts")
+    private Timestamp start;
+    @Column(name = "ends")
+    private Timestamp end;
+    private Timestamp remindOn;
     private Boolean alive;
 
 }
+

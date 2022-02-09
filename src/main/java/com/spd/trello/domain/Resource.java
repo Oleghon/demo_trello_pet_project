@@ -1,17 +1,24 @@
 package com.spd.trello.domain;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import java.sql.Timestamp;
 
 @Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@MappedSuperclass
 public class Resource extends Domain {
+    @Column(updatable = false)
     private String createdBy;
     private String updatedBy;
-    private LocalDateTime createdDate = LocalDateTime.now();
-    private LocalDateTime updatedDate;
+
+    @CreatedDate
+    @Column(updatable = false)
+    private Timestamp createdDate;
+
+    @LastModifiedDate
+    private Timestamp updatedDate;
 }
