@@ -8,5 +8,8 @@ spring:
   mvc:
       pathmatch:
         matching-strategy: ant_path_matcher
+  jpa:
+    show-sql: true
+
 #  flyway:
 #    enabled: false
