@@ -14,6 +14,6 @@ public class BoardService extends AbstractService<Board, BoardRepository> {
     }
 
     public List<Board> findAllByWorkspace(UUID id){
-        return repository.findAllByWorkSpaceId(id);
+        return repository.findBoardsByWorkspaceId(id);
     }
 }

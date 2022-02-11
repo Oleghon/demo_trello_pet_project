@@ -1,6 +1,5 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.resources.Board;
 import com.spd.trello.domain.resources.Comment;
 import com.spd.trello.repository_jpa.CommentRepository;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,6 @@ public class CommentService extends AbstractService<Comment, CommentRepository> 
     }
 
     public List<Comment> findAllByCard(UUID id){
-        return repository.findAllByCardId(id);
+        return repository.findCommentsByCardId(id);
     }
 }
