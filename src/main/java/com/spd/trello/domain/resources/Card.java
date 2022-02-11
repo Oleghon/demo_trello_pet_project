@@ -19,9 +19,8 @@ public class Card extends Resource {
     private String name;
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "cardlist_id")
-    private CardList cardList;
+    @Column(name = "cardlist_id")
+    private UUID cardListId;
 
     private Boolean archived = false;
 

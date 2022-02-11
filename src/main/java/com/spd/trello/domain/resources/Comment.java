@@ -1,13 +1,13 @@
 package com.spd.trello.domain.resources;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.spd.trello.domain.items.Attachment;
 import com.spd.trello.domain.Resource;
+import com.spd.trello.domain.items.Attachment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -16,14 +16,11 @@ import java.util.List;
 public class Comment extends Resource {
     private String text;
 
-    @EqualsAndHashCode.Exclude
-    @ManyToOne
-    @JoinColumn(name = "card_id")
-    private Card card;
+    @Column(name = "card_id")
+    private UUID cardId;
 
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.REMOVE,
             mappedBy = "comment")
-    @JsonIgnoreProperties("comment")
     private List<Attachment> attachments;
 }

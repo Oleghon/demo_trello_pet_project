@@ -1,5 +1,6 @@
 package com.spd.trello.domain.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.enums.BoardVisibility;
 import lombok.Data;
@@ -20,14 +21,14 @@ public class Board extends Resource {
     private String name;
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "workspace_id")
-    private WorkSpace workSpace;
+    @Column(name = "workspace_id")
+    private UUID workspaceId;
 
     @ElementCollection
     @CollectionTable(name = "cardlists",
             joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "id")
+    @JsonIgnore
     private List<UUID> cardLists = new ArrayList<>();
 
     @ElementCollection
