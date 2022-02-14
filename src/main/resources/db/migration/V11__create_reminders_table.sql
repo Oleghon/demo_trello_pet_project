@@ -8,7 +8,5 @@ CREATE TABLE reminders(
     ends TIMESTAMP without time zone,
     remind_on TIMESTAMP without time zone,
     alive BOOLEAN,
-    card_id uuid NOT NULL CONSTRAINT reminder_card_id_fk REFERENCES cards(id) on delete cascade
 );
-CREATE UNIQUE INDEX reminder_card_id_uindex ON reminders(id);
 
