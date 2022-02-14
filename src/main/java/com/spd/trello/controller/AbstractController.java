@@ -31,7 +31,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
     public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody E resource) {
         resource.setUpdatedBy("chekchek@gmail.com");
         E result = service.update(resource);
-        return new ResponseEntity<>(result, HttpStatus.RESET_CONTENT);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -43,9 +43,9 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @DeleteMapping("/{id}")
     @Override
-    public HttpStatus delete(@PathVariable UUID id) {
-        service.delete(id);
-        return HttpStatus.OK;
+    public ResponseEntity<E> delete(@PathVariable UUID id) {
+        E result = service.delete(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping

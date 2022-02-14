@@ -12,7 +12,7 @@ public interface CommonService<E extends Resource> {
 
     E readById(UUID id);
 
-    void delete(UUID id);
+    E delete(UUID id);
 
     List<E> readAll();
 }

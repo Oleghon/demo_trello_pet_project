@@ -15,7 +15,7 @@ public interface IController<E extends Resource> {
 
     ResponseEntity<E> readById(UUID id);
 
-    HttpStatus delete(UUID id);
+    ResponseEntity<E> delete(UUID id);
 
     List<E> readAll();
 }

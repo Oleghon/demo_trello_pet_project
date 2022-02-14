@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {NullPointerException.class, IllegalArgumentException.class})
+    @ExceptionHandler(value = {IllegalArgumentException.class})
     protected ResponseEntity<Object> handle(
             RuntimeException ex, WebRequest request) {
         String responseBody = "Something went wrong...";

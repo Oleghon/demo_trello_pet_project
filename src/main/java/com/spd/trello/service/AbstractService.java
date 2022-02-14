@@ -19,14 +19,14 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
 
     @Override
     public E create(E entity) {
-        entity.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        entity.setCreatedDate(LocalDateTime.now());
         return repository.save(entity);
     }
 
     @Override
     public E update(E entity) {
         readById(entity.getId());
-        entity.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        entity.setUpdatedDate(LocalDateTime.now());
         return repository.save(entity);
     }
 
@@ -36,9 +36,10 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
     }
 
     @Override
-    public void delete(UUID id) {
-    readById(id);
-    repository.deleteById(id);
+    public E delete(UUID id) {
+        E result = readById(id);
+        repository.deleteById(id);
+        return result;
     }
 
     @Override

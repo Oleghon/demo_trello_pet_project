@@ -1,5 +1,6 @@
 package com.spd.trello.domain.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.items.Attachment;
 import lombok.Data;
@@ -22,5 +23,6 @@ public class Comment extends Resource {
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.REMOVE,
             mappedBy = "comment")
+    @JsonIgnoreProperties("comment")
     private List<Attachment> attachments;
 }
