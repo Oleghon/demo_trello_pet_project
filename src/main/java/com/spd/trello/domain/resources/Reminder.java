@@ -4,8 +4,10 @@ import com.spd.trello.domain.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -13,14 +15,11 @@ import java.sql.Timestamp;
 @Entity
 public class Reminder extends Resource {
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "card_id", referencedColumnName = "id")
-    private Card card;
     @Column(name = "starts")
-    private Timestamp start;
+    private LocalDateTime start;
     @Column(name = "ends")
-    private Timestamp end;
-    private Timestamp remindOn;
+    private LocalDateTime end;
+    private LocalDateTime remindOn;
     private Boolean alive;
 
 }

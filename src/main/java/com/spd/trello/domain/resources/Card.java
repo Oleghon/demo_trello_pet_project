@@ -1,15 +1,15 @@
 package com.spd.trello.domain.resources;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spd.trello.domain.Resource;
+import com.spd.trello.domain.items.Attachment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -32,25 +32,17 @@ public class Card extends Resource {
     @Column(name = "member_id")
     private List<UUID> assignedMembers = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(
-            name = "comments",
-            joinColumns = @JoinColumn(name = "card_id")
-    )
-    @Column(name = "id")
-    private List<UUID> comments = new ArrayList<>();
-
     @ManyToMany
     @JoinTable(name = "label_card",
             joinColumns = @JoinColumn(name = "card_id"),
             inverseJoinColumns = @JoinColumn(name = "label_id"))
     private List<Label> labels;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "checklists",
-            joinColumns = @JoinColumn(name = "card_id")
-    )
-    @Column(name = "id")
-    private List<UUID> checkList;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "card")
+    @JsonIgnoreProperties("card")
+    private Set<Attachment> attachments = new LinkedHashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "reminder_id", referencedColumnName = "id")
+    private Reminder reminder;
 }

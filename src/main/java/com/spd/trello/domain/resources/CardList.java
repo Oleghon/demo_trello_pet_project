@@ -17,15 +17,7 @@ import java.util.UUID;
 public class CardList extends Resource {
     private String name;
 
-    @Column(name = "board_id")
+//    @Column(name = "board_id")
     private UUID boardId;
-
-    @ElementCollection
-    @CollectionTable(name = "cards",
-            joinColumns = @JoinColumn(name = "cardlist_id"))
-    @Column(name = "id")
-    @JsonIgnore
-    private List<UUID> cards = new ArrayList<>();
-
     private Boolean archived = false;
 }

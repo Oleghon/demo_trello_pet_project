@@ -6,10 +6,7 @@ import com.spd.trello.domain.resources.Comment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.File;
 
 @Data
@@ -21,11 +18,11 @@ public class Attachment extends Domain {
     private String name;
     private File file;
 
-    @ManyToOne
-    @JoinColumn(name = "card_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "card_id", nullable= true)
     private Card card;
 
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "comment_id", nullable = true)
     private Comment comment;
 }

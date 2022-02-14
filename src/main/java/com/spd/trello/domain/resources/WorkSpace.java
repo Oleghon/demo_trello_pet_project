@@ -1,6 +1,5 @@
 package com.spd.trello.domain.resources;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.enums.WorkSpaceVisibility;
 import lombok.Data;
@@ -19,12 +18,6 @@ public class WorkSpace extends Resource {
 
     private String name;
     private String description;
-
-    @ElementCollection
-    @CollectionTable(name = "boards",
-    joinColumns = @JoinColumn(name = "workspace_id"))
-    @Column(name = "id")
-    private List<UUID> boardList = new ArrayList<>();
 
     @ElementCollection
     @LazyCollection(LazyCollectionOption.FALSE)

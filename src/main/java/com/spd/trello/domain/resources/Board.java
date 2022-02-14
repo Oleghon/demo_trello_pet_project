@@ -25,13 +25,6 @@ public class Board extends Resource {
     private UUID workspaceId;
 
     @ElementCollection
-    @CollectionTable(name = "cardlists",
-            joinColumns = @JoinColumn(name = "board_id"))
-    @Column(name = "id")
-    @JsonIgnore
-    private List<UUID> cardLists = new ArrayList<>();
-
-    @ElementCollection
     @LazyCollection(LazyCollectionOption.FALSE)
     @CollectionTable(
             name = "board_member",
