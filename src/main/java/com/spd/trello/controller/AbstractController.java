@@ -2,11 +2,12 @@ package com.spd.trello.controller;
 
 import com.spd.trello.domain.Resource;
 import com.spd.trello.service.CommonService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 public class AbstractController<E extends Resource, S extends CommonService<E>>
@@ -50,7 +51,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @GetMapping
     @Override
-    public List<E> readAll() {
-        return service.readAll();
+    public Page<E> readAll(Pageable pageable) {
+        return service.readAll(pageable);
     }
 }

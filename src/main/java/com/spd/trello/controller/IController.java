@@ -1,10 +1,10 @@
 package com.spd.trello.controller;
 
 import com.spd.trello.domain.Resource;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface IController<E extends Resource> {
@@ -17,5 +17,5 @@ public interface IController<E extends Resource> {
 
     ResponseEntity<E> delete(UUID id);
 
-    List<E> readAll();
+    Page<E> readAll(Pageable pageable);
 }

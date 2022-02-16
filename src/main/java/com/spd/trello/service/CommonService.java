@@ -1,8 +1,9 @@
 package com.spd.trello.service;
 
 import com.spd.trello.domain.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CommonService<E extends Resource> {
@@ -14,5 +15,5 @@ public interface CommonService<E extends Resource> {
 
     E delete(UUID id);
 
-    List<E> readAll();
+    Page<E> readAll(Pageable pageable);
 }

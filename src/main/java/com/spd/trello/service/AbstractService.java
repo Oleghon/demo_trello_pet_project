@@ -3,10 +3,10 @@ package com.spd.trello.service;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.exception.EntityNotFoundException;
 import com.spd.trello.repository_jpa.CommonRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public abstract class AbstractService<E extends Resource, R extends CommonRepository<E>> implements CommonService<E> {
@@ -43,7 +43,7 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
     }
 
     @Override
-    public List<E> readAll() {
-        return repository.findAll();
+    public Page<E> readAll(Pageable pageable){
+        return repository.findAll(pageable);
     }
 }
