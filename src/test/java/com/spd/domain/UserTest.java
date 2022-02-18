@@ -1,71 +1,103 @@
 package com.spd.domain;
 
-import com.spd.trello.domain.User;
+import com.spd.trello.domain.resources.User;
+import com.spd.trello.exception.EntityNotFoundException;
+import com.spd.trello.repository_jpa.UserRepository;
 import com.spd.trello.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class UserTest extends BaseTest {
 
-    private static UserService service;
+    @Mock
+    private UserRepository repository;
 
-    public UserTest() {
-        service = new UserService();
-    }
+    @InjectMocks
+    private UserService service;
 
     @BeforeEach
-    void createTestUser() {
-        user.setId(UUID.randomUUID());
-        user = service.create(BaseTest.user);
+    private void setUp() {
+        user.setId(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c3bd9"));
     }
 
     @Test
     public void successCreate() {
-        user = service.create("Test", "Test", "Test", "test@test.com");
-        assertNotNull(user);
+        when(repository.save(user)).thenReturn(user);
+        User actual = service.create(user);
+        assertThat(actual.getCreatedDate()).isNotNull();
         assertAll(
-                () -> assertNotNull(user.getCreatedDate()),
-                () -> assertNotNull(user.getId()),
-                () -> assertEquals("Test", user.getCreatedBy()),
-                () -> assertEquals("Test", user.getFirstName()),
-                () -> assertEquals("Test", user.getLastName()),
-                () -> assertEquals("test@test.com", user.getEmail())
+                () -> assertEquals(user.getFirstName(), actual.getFirstName()),
+                () -> assertEquals(user.getLastName(), actual.getLastName()),
+                () -> assertEquals(user.getEmail(), actual.getEmail())
         );
+        verify(repository, times(1)).save(user);
     }
 
     @Test
     public void successGetObjects() {
-        List<User> users = service.readAll();
-        assertNotEquals(0, users.size());
+        user.setId(UUID.randomUUID());
+        service.create(user);
+        Page<User> expected = new PageImpl<User>(List.of(user, user), pageable, 2);
+
+        when(repository.findAll(pageable)).thenReturn(expected);
+
+        List<User> actual = service.readAll(pageable).getContent();
+        assertEquals(expected.getContent().size(), actual.size());
+
     }
 
     @Test
     public void successUpdate() {
+        when(repository.findById(any())).thenReturn(Optional.of(user));
+        when(repository.save(user)).thenReturn(user);
+
         user.setFirstName("Test2");
         user.setUpdatedBy("Test2");
         user.setCreatedBy("Test2");
-        User actual = service.update(user.getId(), user);
-        assertNotNull(actual);
+
+        User actual = service.update(user);
         assertAll(
                 () -> assertNotNull(actual.getUpdatedDate()),
                 () -> assertEquals(user.getFirstName(), actual.getFirstName()),
-                () -> assertEquals(user.getUpdatedBy(), actual.getUpdatedBy()),
-                () -> assertNotEquals(user.getCreatedBy(), actual.getCreatedBy())
+                () -> assertEquals(user.getUpdatedBy(), actual.getUpdatedBy())
         );
+
+        verify(repository, times(1)).findById(any());
+        verify(repository, times(1)).save(user);
     }
 
     @Test
-    public void failDelete() {
-        assertFalse(service.delete(UUID.randomUUID()));
+    public void failReadById() {
+        assertThrows(EntityNotFoundException.class, () -> service.readById(UUID.randomUUID()));
+        verify(repository, times(1)).findById(any());
     }
 
     @Test
     public void successDelete() {
-        assertTrue(service.delete(user.getId()));
+        when(repository.save(user)).thenReturn(user);
+        when(repository.findById(any())).thenReturn(Optional.of(user));
+        doNothing().when(repository).deleteById(any());
+
+        user.setId(UUID.randomUUID());
+        User expected = service.create(user);
+        User actual = service.delete(expected.getId());
+
+        assertEquals(expected.getCreatedBy(), actual.getCreatedBy());
+
+        verify(repository, times(1)).save(user);
+        verify(repository, times(1)).findById(any());
+        verify(repository, times(1)).deleteById(any());
     }
 }
