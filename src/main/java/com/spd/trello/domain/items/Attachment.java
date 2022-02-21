@@ -19,10 +19,10 @@ public class Attachment extends Domain {
     private File file;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "card_id", nullable= true)
+    @JoinColumn(name = "card_id", nullable= true, referencedColumnName = "id")
     private Card card;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "comment_id", nullable = true)
+    @JoinColumn(name = "comment_id", nullable = true, referencedColumnName = "id")
     private Comment comment;
 }

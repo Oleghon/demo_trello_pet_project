@@ -1,5 +1,6 @@
-package com.spd.trello.domain.resources;
+package com.spd.trello.domain.items;
 
+import com.spd.trello.domain.Domain;
 import com.spd.trello.domain.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "reminders")
 @Entity
-public class Reminder extends Resource {
+public class Reminder extends Domain {
 
     @Column(name = "starts")
     private LocalDateTime start;

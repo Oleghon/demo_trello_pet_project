@@ -3,6 +3,7 @@ package com.spd.trello.domain.resources;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.items.Attachment;
+import com.spd.trello.domain.items.Reminder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
@@ -18,11 +19,10 @@ import java.util.*;
 public class Card extends Resource {
     private String name;
     private String description;
+    private Boolean archived = false;
 
     @Column(name = "cardlist_id")
     private UUID cardListId;
-
-    private Boolean archived = false;
 
     @ElementCollection
     @LazyCollection(LazyCollectionOption.FALSE)
