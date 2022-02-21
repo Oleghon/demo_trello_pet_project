@@ -1,7 +1,7 @@
 package com.spd.domain;
 
 import com.spd.trello.domain.resources.Card;
-import com.spd.trello.domain.resources.Reminder;
+import com.spd.trello.domain.items.Reminder;
 import com.spd.trello.exception.EntityNotFoundException;
 import com.spd.trello.repository_jpa.CardRepository;
 import com.spd.trello.service.CardService;
