@@ -1,31 +1,27 @@
 package com.spd.controller;
 
+import com.spd.trello.Application;
+import com.spd.trello.domain.enums.BoardVisibility;
 import com.spd.trello.domain.resources.Board;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.List;
 import java.util.UUID;
 
-import static com.spd.controller.MemberControllerTest.member;
-import static com.spd.controller.WorkspaceControllerTest.space;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = Application.class)
+@AutoConfigureMockMvc
 public class BoardControllerTest extends AbstractControllerTest<Board> {
 
     private static String URL = "/boards";
-    static Board board = new Board();
-
-    @BeforeEach
-    public void setUp() {
-        board.setId(UUID.fromString("3ee847d3-9555-521d-13bd-6ad5f30c4bd2"));
-        board.setName("test space");
-        board.setDescription("test desc");
-        board.setWorkspaceId(space.getId());
-    }
 
     @Test
     @DisplayName("readAll")
@@ -36,57 +32,80 @@ public class BoardControllerTest extends AbstractControllerTest<Board> {
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        Board expected = board;
+        Board expected = new Board();
+        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
+        expected.setName("board test");
+        expected.setDescription("desc test");
         MvcResult result = super.create(URL, expected);
-        Board actual = super.mapFromJson(result.getResponse().getContentAsString(), Board.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName()),
-                () -> assertNotNull(actual.getCreatedDate())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getVisibility().name(), getValue(result, "$.visibility"))
         );
     }
 
     @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
-        Board expected = board;
-        expected.setMembers(List.of(member.getId()));
+        Board expected = new Board();
+        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
+        expected.setName("board test");
+        expected.setDescription("desc test");
+        super.create(URL, expected);
 
+        expected.setName("board test2 ");
+        expected.setDescription("desc test 2");
+        expected.setVisibility(BoardVisibility.WORKSPACE);
         MvcResult result = super.update(URL, expected);
-        Board actual = super.mapFromJson(result.getResponse().getContentAsString(), Board.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertNotNull(actual.getUpdatedDate()),
-                () -> assertNotNull(actual.getUpdatedBy())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getVisibility().name(), getValue(result, "$.visibility"))
         );
     }
 
     @Test
     @DisplayName("readById")
     public void successReadById() throws Exception {
-        Board expected = board;
+        Board expected = new Board();
+        expected.setId(UUID.fromString("7ee897d3-9065-821d-93bd-4ad6f30c5bd4"));
         MvcResult result = super.readById(URL, expected.getId());
-        Board actual = super.mapFromJson(result.getResponse().getContentAsString(), Board.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName())
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertNotNull(getValue(result, "$.name")),
+                () -> assertNotNull(getValue(result, "$.description")),
+                () -> assertNotNull(getValue(result, "$.visibility"))
         );
     }
 
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        Board expected = board;
+        Board expected = new Board();
+        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
+        expected.setName("board test");
+        expected.setDescription("desc test");
+        super.create(URL, expected);
         MvcResult result = super.delete(URL, expected.getId());
-        Board actual = super.mapFromJson(result.getResponse().getContentAsString(), Board.class);
 
         assertAll(
-                () -> assertEquals(expected.getId(), actual.getId()),
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getVisibility().name(), getValue(result, "$.visibility"))
         );
     }
 

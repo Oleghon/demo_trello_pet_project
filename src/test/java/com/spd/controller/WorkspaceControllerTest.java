@@ -1,29 +1,29 @@
 package com.spd.controller;
 
+import com.spd.trello.Application;
 import com.spd.trello.domain.resources.WorkSpace;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Set;
 import java.util.UUID;
 
-import static com.spd.controller.MemberControllerTest.member;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+        classes = Application.class)
+@AutoConfigureMockMvc
 public class WorkspaceControllerTest extends AbstractControllerTest<WorkSpace> {
 
     private static String URL = "/workspaces";
-    static WorkSpace space = new WorkSpace();
 
-    @BeforeEach
-    public void setUp() {
-        space.setId(UUID.fromString("7ee847d3-9845-521d-13bd-6ad5f30c4bd7"));
-        space.setName("test space");
-        space.setDescription("test desc");
-    }
 
     @Test
     @DisplayName("readAll")
@@ -34,57 +34,72 @@ public class WorkspaceControllerTest extends AbstractControllerTest<WorkSpace> {
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        WorkSpace expected = space;
+        WorkSpace expected = new WorkSpace();
+        expected.setName("test");
+        expected.setDescription("test desc");
+        expected.setWorkspaceMembers(Set.of(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c5bd4")));
+
         MvcResult result = super.create(URL, expected);
-        WorkSpace actual = super.mapFromJson(result.getResponse().getContentAsString(), WorkSpace.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName()),
-                () -> assertNotNull(actual.getCreatedDate())
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description"))
         );
     }
 
     @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
-        WorkSpace expected = space;
-        expected.setWorkspaceMembers(Set.of(member.getId()));
+        WorkSpace expected = new WorkSpace();
+        expected.setName("test");
+        expected.setDescription("test desc");
+        expected.setWorkspaceMembers(Set.of(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c5bd4")));
+        super.create(URL, expected);
+
+        expected.setName("test2");
+        expected.setDescription("test2");
 
         MvcResult result = super.update(URL, expected);
-        WorkSpace actual = super.mapFromJson(result.getResponse().getContentAsString(), WorkSpace.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertNotNull(actual.getUpdatedDate()),
-                () -> assertNotNull(actual.getUpdatedBy())
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description"))
         );
     }
 
     @Test
     @DisplayName("readById")
     public void successReadById() throws Exception {
-        WorkSpace expected = space;
-        MvcResult result = super.readById(URL, expected.getId());
-        WorkSpace actual = super.mapFromJson(result.getResponse().getContentAsString(), WorkSpace.class);
+        WorkSpace expected = new WorkSpace();
+        expected.setId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
 
+        MvcResult result = super.readById(URL, expected.getId());
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName())
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy"))
         );
+
     }
 
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        WorkSpace expected = space;
+        WorkSpace expected = new WorkSpace();
+        expected.setName("test");
+        expected.setDescription("test desc");
+        expected.setWorkspaceMembers(Set.of(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c5bd4")));
+        super.create(URL, expected);
         MvcResult result = super.delete(URL, expected.getId());
-        WorkSpace actual = super.mapFromJson(result.getResponse().getContentAsString(), WorkSpace.class);
 
         assertAll(
-                () -> assertEquals(expected.getId(), actual.getId()),
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description"))
         );
     }
 

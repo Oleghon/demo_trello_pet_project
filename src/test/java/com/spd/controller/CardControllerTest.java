@@ -1,29 +1,27 @@
 package com.spd.controller;
 
+import com.spd.trello.Application;
 import com.spd.trello.domain.items.Reminder;
 import com.spd.trello.domain.resources.Card;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.UUID;
 
-import static com.spd.controller.CardListControllerTest.cardList;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = Application.class)
+@AutoConfigureMockMvc
 public class CardControllerTest extends AbstractControllerTest<Card> {
 
     private static String URL = "/cards";
-    static Card card = new Card();
-
-    @BeforeEach
-    public void setUp() {
-        card.setId(UUID.fromString("3ee843d3-9525-821d-13bd-6ad5f32c4bd2"));
-        card.setName("test space");
-        card.setCardListId(cardList.getId());
-    }
 
     @Test
     @DisplayName("readAll")
@@ -34,77 +32,110 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        Card expected = card;
+        Card expected = new Card();
+        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
+        expected.setName("test");
+        expected.setArchived(true);
+        expected.setDescription("card desc");
         MvcResult result = super.create(URL, expected);
-        Card actual = super.mapFromJson(result.getResponse().getContentAsString(), Card.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName()),
-                () -> assertNotNull(actual.getCreatedDate())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
         );
     }
 
     @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
-        Card expected = card;
-        expected.setName("test2");
-        expected.setDescription("test desc");
 
+        Card expected = new Card();
+        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
+        expected.setName("test");
+        expected.setArchived(true);
+        expected.setDescription("card desc");
+
+        super.create(URL, expected);
+
+        expected.setName("test2");
+        expected.setDescription("new desc");
         MvcResult result = super.update(URL, expected);
-        Card actual = super.mapFromJson(result.getResponse().getContentAsString(), Card.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName()),
-                () -> assertNotNull(actual.getUpdatedDate()),
-                () -> assertNotNull(actual.getUpdatedBy())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
         );
     }
 
     @Test
     @DisplayName("addReminder")
     public void successAddReminder() throws Exception {
-        Card expected = card;
+
+        Card expected = new Card();
+        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
+        expected.setName("test");
+        expected.setArchived(true);
+        expected.setDescription("card desc");
+        super.create(URL, expected);
+
         Reminder reminder = new Reminder();
         reminder.setAlive(true);
         expected.setReminder(reminder);
 
         MvcResult result = super.update(URL, expected);
-        Card actual = super.mapFromJson(result.getResponse().getContentAsString(), Card.class);
 
         assertAll(
-                () -> assertNotNull(actual.getUpdatedDate()),
-                () -> assertNotNull(actual.getUpdatedBy()),
-                () -> assertEquals(expected.getReminder().getId(), actual.getReminder().getId())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertNotNull(getValue(result, "$.reminder")),
+                () -> assertNotNull(getValue(result, "$.reminder.alive"))
         );
     }
 
     @Test
     @DisplayName("readById")
     public void successReadById() throws Exception {
-        Card expected = card;
+        Card expected = new Card();
+        expected.setId(UUID.fromString("7ee897d3-9535-885d-93bd-4ad6f36c5fd4"));
+
         MvcResult result = super.readById(URL, expected.getId());
-        Card actual = super.mapFromJson(result.getResponse().getContentAsString(), Card.class);
 
         assertAll(
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(expected.getName(), actual.getName())
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.reminder")),
+                () -> assertNotNull(getValue(result, "$.reminder.alive")),
+                () -> assertNotNull(getValue(result, "$.name")),
+                () -> assertNotNull(getValue(result, "$.description")),
+                () -> assertNotNull(getValue(result, "$.archived"))
         );
     }
 
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        Card expected = card;
+        //toDo
+        Card expected = new Card();
+        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
+        expected.setName("test");
+        expected.setArchived(true);
+        expected.setDescription("card desc");
+        super.create(URL, expected);
+
         MvcResult result = super.delete(URL, expected.getId());
-        Card actual = super.mapFromJson(result.getResponse().getContentAsString(), Card.class);
 
         assertAll(
-                () -> assertEquals(expected.getId(), actual.getId()),
-                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
-                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
+                () -> assertEquals(expected.getDescription(), getValue(result, "$.description")),
+                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
         );
     }
 
