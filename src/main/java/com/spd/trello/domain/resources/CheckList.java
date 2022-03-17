@@ -5,11 +5,12 @@ import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.items.CheckableItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,11 +19,9 @@ import java.util.UUID;
 public class CheckList extends Resource {
     private String name;
 
-    @Column(name = "card_id")
-    private UUID cardId;
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             mappedBy = "checkList")
     @JsonIgnoreProperties("checkList")
-    private List<CheckableItem> items = new ArrayList<>();
+    private Set<CheckableItem> items = new LinkedHashSet<>();
 }

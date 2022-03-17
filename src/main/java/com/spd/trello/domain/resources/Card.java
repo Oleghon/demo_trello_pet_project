@@ -32,11 +32,12 @@ public class Card extends Resource {
     @Column(name = "member_id")
     private List<UUID> assignedMembers = new ArrayList<>();
 
-    @ManyToMany
+    @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(name = "label_card",
-            joinColumns = @JoinColumn(name = "card_id"),
-            inverseJoinColumns = @JoinColumn(name = "label_id"))
-    private List<Label> labels;
+            joinColumns = @JoinColumn(name = "card_id"))
+    @Column(name="label_id")
+    private List<UUID> labels;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "card")
     @JsonIgnoreProperties("card")
@@ -44,5 +45,6 @@ public class Card extends Resource {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "reminder_id", referencedColumnName = "id")
+    @JsonIgnoreProperties("card")
     private Reminder reminder;
 }

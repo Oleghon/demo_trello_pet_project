@@ -10,6 +10,9 @@ spring:
         matching-strategy: ant_path_matcher
   jpa:
     show-sql: true
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
 
 #  flyway:
 #    enabled: false

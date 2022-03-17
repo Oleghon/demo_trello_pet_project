@@ -1,5 +1,7 @@
 package com.spd.trello.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -20,8 +22,10 @@ public class Resource extends Domain {
 
     @CreatedDate
     @Column(updatable = false)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createdDate;
 
     @LastModifiedDate
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime updatedDate;
 }

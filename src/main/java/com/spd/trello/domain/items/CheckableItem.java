@@ -13,9 +13,9 @@ import javax.persistence.*;
 @Entity
 @Table(name = "items")
 public class CheckableItem extends Domain {
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "checklist_id", referencedColumnName = "id")
-    @JsonIgnoreProperties("checkListItem")
+    @JsonIgnoreProperties("items")
     private CheckList checkList;
     private String name;
     @Column(name = "checked")
