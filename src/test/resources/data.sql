@@ -1,5 +1,5 @@
 insert into users(id, first_name, created_date, created_by, last_name, email)
-values ('7ee897d3-9065-421d-93bd-7ad5f30c3bd9','testuser','2020-09-16 14:15:32.464391','test creator','test lastname','testemail');
+values ('7ee897d3-9065-421d-93bd-7ad5f30c3bd9','test name','2020-09-16 14:15:32.464391','test creator','test lastname','email@test.com');
 
 insert into members (id, created_by, created_date,  role, user_id)
 values ('7ee897d3-9065-421d-93bd-7ad5f30c5bd4','test','2020-09-16 14:15:32.464391', 'ADMIN', '7ee897d3-9065-421d-93bd-7ad5f30c3bd9');

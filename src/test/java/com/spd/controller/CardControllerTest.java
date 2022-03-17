@@ -3,10 +3,12 @@ package com.spd.controller;
 import com.spd.trello.Application;
 import com.spd.trello.domain.items.Reminder;
 import com.spd.trello.domain.resources.Card;
+import com.spd.trello.repository_jpa.CardRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -23,20 +25,24 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
 
     private static String URL = "/cards";
 
+    @Autowired
+    CardRepository repository;
+
     @Test
     @DisplayName("readAll")
     public void successReadAll() throws Exception {
-        super.getAll(URL);
+        MvcResult result = super.getAll(URL);
+
+        assertAll(
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+        );
     }
+
 
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        Card expected = new Card();
-        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
-        expected.setName("test");
-        expected.setArchived(true);
-        expected.setDescription("card desc");
+        Card expected = EntityBuilder.buildCard();
         MvcResult result = super.create(URL, expected);
 
         assertAll(
@@ -53,13 +59,7 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
     @DisplayName("update")
     public void successUpdate() throws Exception {
 
-        Card expected = new Card();
-        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
-        expected.setName("test");
-        expected.setArchived(true);
-        expected.setDescription("card desc");
-
-        super.create(URL, expected);
+        Card expected = EntityBuilder.getCard(repository);
 
         expected.setName("test2");
         expected.setDescription("new desc");
@@ -79,12 +79,7 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
     @DisplayName("addReminder")
     public void successAddReminder() throws Exception {
 
-        Card expected = new Card();
-        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
-        expected.setName("test");
-        expected.setArchived(true);
-        expected.setDescription("card desc");
-        super.create(URL, expected);
+        Card expected = EntityBuilder.getCard(repository);
 
         Reminder reminder = new Reminder();
         reminder.setAlive(true);
@@ -122,14 +117,7 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        //toDo
-        Card expected = new Card();
-        expected.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
-        expected.setName("test");
-        expected.setArchived(true);
-        expected.setDescription("card desc");
-        super.create(URL, expected);
-
+        Card expected = EntityBuilder.getCard(repository);
         MvcResult result = super.delete(URL, expected.getId());
 
         assertAll(

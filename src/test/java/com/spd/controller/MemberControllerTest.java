@@ -4,9 +4,12 @@ import com.spd.trello.Application;
 import com.spd.trello.domain.enums.Role;
 import com.spd.trello.domain.resources.Member;
 import com.spd.trello.domain.resources.User;
+import com.spd.trello.repository_jpa.MemberRepository;
+import com.spd.trello.repository_jpa.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -25,21 +28,23 @@ public class MemberControllerTest extends AbstractControllerTest<Member> {
 
     private static String URL = "/members";
 
+    @Autowired
+    private MemberRepository repository;
+
     @Test
     @DisplayName("readAll")
     public void successReadAll() throws Exception {
-        super.getAll(URL);
+        MvcResult result = super.getAll(URL);
+
+        assertAll(
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+        );
     }
 
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        Member expected = new Member();
-        User user = new User();
-        user.setId(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c3bd9"));
-        expected.setUser(user);
-        expected.setRole(Role.ADMIN);
-        expected.setId(UUID.fromString("7ee897d3-9065-421d-92bd-3ad4f30c5bd9"));
+        Member expected = EntityBuilder.buildMember();
         MvcResult result = super.create(URL, expected);
 
         assertAll(
@@ -52,15 +57,12 @@ public class MemberControllerTest extends AbstractControllerTest<Member> {
     @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
-        Member expected = new Member();
-        expected.setRole(Role.MEMBER);
-        expected.setId(UUID.fromString("7ee897d3-9065-421d-92bd-3ad4f30c5bd9"));
-        User user = new User();
-        user.setId(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c3bd9"));
-        expected.setUser(user);
+        Member expected = EntityBuilder.getMember(repository);
         MvcResult result = super.update(URL, expected);
 
         assertAll(
+                () -> assertNotNull(getValue(result, "$.createdDate")),
+                () -> assertNotNull(getValue(result, "$.createdBy")),
                 () -> assertNotNull(getValue(result, "$.updatedDate")),
                 () -> assertNotNull(getValue(result, "$.updatedBy")),
                 () -> assertEquals(expected.getRole().name(), getValue(result, "$.role"))
@@ -77,18 +79,22 @@ public class MemberControllerTest extends AbstractControllerTest<Member> {
 
         assertAll(
                 () -> assertNotNull(getValue(result, "$.createdDate")),
-                () -> assertNotNull(getValue(result, "$.createdBy"))
+                () -> assertEquals("test", getValue(result, "$.createdBy")),
+                () -> assertEquals(Role.ADMIN.toString(), getValue(result, "$.role"))
         );
+    }
+
+    @Test
+    @DisplayName("failReadById")
+    public void failReadById() throws Exception{
+        MvcResult result = super.readById(URL, UUID.randomUUID());
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
     }
 
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        Member expected = new Member();
-        User user = new User();
-        user.setId(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c3bd9"));
-        expected.setUser(user);
-        super.create(URL, expected);
+        Member expected = EntityBuilder.getMember(repository);
 
         MvcResult result = super.delete(URL, expected.getId());
 

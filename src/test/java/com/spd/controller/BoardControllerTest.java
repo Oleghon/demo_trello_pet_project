@@ -3,10 +3,12 @@ package com.spd.controller;
 import com.spd.trello.Application;
 import com.spd.trello.domain.enums.BoardVisibility;
 import com.spd.trello.domain.resources.Board;
+import com.spd.trello.repository_jpa.BoardRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -23,19 +25,24 @@ public class BoardControllerTest extends AbstractControllerTest<Board> {
 
     private static String URL = "/boards";
 
+    @Autowired
+    private BoardRepository repository;
+
     @Test
     @DisplayName("readAll")
     public void successReadAll() throws Exception {
-        super.getAll(URL);
+        MvcResult result = super.getAll(URL);
+
+        assertAll(
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus())
+        );
     }
+
 
     @Test
     @DisplayName("create")
     public void successCreate() throws Exception {
-        Board expected = new Board();
-        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
-        expected.setName("board test");
-        expected.setDescription("desc test");
+        Board expected = EntityBuilder.buildBoard();
         MvcResult result = super.create(URL, expected);
 
         assertAll(
@@ -51,11 +58,7 @@ public class BoardControllerTest extends AbstractControllerTest<Board> {
     @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
-        Board expected = new Board();
-        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
-        expected.setName("board test");
-        expected.setDescription("desc test");
-        super.create(URL, expected);
+        Board expected = EntityBuilder.getBoard(repository);
 
         expected.setName("board test2 ");
         expected.setDescription("desc test 2");
@@ -77,6 +80,7 @@ public class BoardControllerTest extends AbstractControllerTest<Board> {
     public void successReadById() throws Exception {
         Board expected = new Board();
         expected.setId(UUID.fromString("7ee897d3-9065-821d-93bd-4ad6f30c5bd4"));
+
         MvcResult result = super.readById(URL, expected.getId());
 
         assertAll(
@@ -92,11 +96,7 @@ public class BoardControllerTest extends AbstractControllerTest<Board> {
     @Test
     @DisplayName("delete")
     public void successDelete() throws Exception {
-        Board expected = new Board();
-        expected.setWorkspaceId(UUID.fromString("7ee897d3-9065-471d-53bd-7ad5f30c5bd4"));
-        expected.setName("board test");
-        expected.setDescription("desc test");
-        super.create(URL, expected);
+        Board expected = EntityBuilder.getBoard(repository);
         MvcResult result = super.delete(URL, expected.getId());
 
         assertAll(
