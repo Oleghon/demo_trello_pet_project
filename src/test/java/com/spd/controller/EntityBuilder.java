@@ -1,10 +1,12 @@
 package com.spd.controller;
 
 import com.spd.trello.domain.enums.Role;
+import com.spd.trello.domain.items.CheckableItem;
 import com.spd.trello.domain.resources.*;
 import com.spd.trello.repository_jpa.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -68,7 +70,7 @@ public class EntityBuilder {
         return repository.save(buildBoard());
     }
 
-    static CardList buildCardList(){
+    static CardList buildCardList() {
         CardList cardList = new CardList();
         cardList.setBoardId(UUID.fromString("7ee897d3-9065-821d-93bd-4ad6f30c5bd4"));
         cardList.setArchived(false);
@@ -78,11 +80,11 @@ public class EntityBuilder {
         return cardList;
     }
 
-    static CardList getCardList(CardListRepository repository){
+    static CardList getCardList(CardListRepository repository) {
         return repository.save(buildCardList());
     }
 
-    static Card buildCard(){
+    static Card buildCard() {
         Card card = new Card();
         card.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
         card.setName("test");
@@ -93,7 +95,26 @@ public class EntityBuilder {
         return card;
     }
 
-    static Card getCard(CardRepository repository){
+    static CheckList buildCheckList() {
+        CheckList checkList = new CheckList();
+        CheckableItem check = new CheckableItem();
+        check.setCheck(true);
+        check.setName("test check");
+        check.setCheckList(checkList);
+
+        checkList.setName("test");
+        checkList.setCreatedDate(LocalDateTime.now());
+        checkList.setItems(List.of(check));
+        return checkList;
+    }
+
+    static Card getCard(CardRepository repository) {
         return repository.save(buildCard());
+    }
+
+    static Card getCardWithCheckList(CardRepository repository) {
+        Card card = buildCard();
+        card.setCheckList(buildCheckList());
+        return repository.save(card);
     }
 }

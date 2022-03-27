@@ -17,11 +17,11 @@ values ('7ee897d3-9065-885d-93bd-4ad6f30c5fd4','test','2020-09-16 14:15:32.46439
 insert into reminders(id, starts, alive)
 values ('7ee837d3-9525-885d-93bd-4ad6f38c5fd4','2020-09-16 14:15:32.464391', false);
 
-insert into cards(id, created_by, created_date, name, description, archived, cardlist_id, reminder_id)
-values ('7ee897d3-9535-885d-93bd-4ad6f36c5fd4','test','2020-09-16 14:15:32.464391','test name', 'test desc', false, '7ee897d3-9065-885d-93bd-4ad6f30c5fd4', '7ee837d3-9525-885d-93bd-4ad6f38c5fd4');
+insert into checklists(id, created_by, created_date, name)
+VALUES ('7ee894d3-9575-885d-93bd-7ad6f36c5fd7','test','2020-09-16 14:15:32.464391','test name');
 
-insert into checklists(id, created_by, created_date, name, card_id)
-VALUES ('7ee894d3-9575-885d-93bd-7ad6f36c5fd7','test','2020-09-16 14:15:32.464391','test name', '7ee897d3-9535-885d-93bd-4ad6f36c5fd4');
+insert into cards(id, created_by, created_date, name, description, archived, cardlist_id, reminder_id, checklist_id)
+values ('7ee897d3-9535-885d-93bd-4ad6f36c5fd4','test','2020-09-16 14:15:32.464391','test name', 'test desc', false, '7ee897d3-9065-885d-93bd-4ad6f30c5fd4', '7ee837d3-9525-885d-93bd-4ad6f38c5fd4', '7ee894d3-9575-885d-93bd-7ad6f36c5fd7');
 
 insert into items(id, name, checked, checklist_id)
 VALUES ('7ee894d3-9675-845d-43bd-7ad6f36c1fd7','test check', true, '7ee894d3-9575-885d-93bd-7ad6f36c5fd7');

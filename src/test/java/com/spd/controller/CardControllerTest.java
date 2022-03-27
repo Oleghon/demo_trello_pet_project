@@ -3,6 +3,7 @@ package com.spd.controller;
 import com.spd.trello.Application;
 import com.spd.trello.domain.items.Reminder;
 import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.CheckList;
 import com.spd.trello.repository_jpa.CardRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,7 +95,62 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
                 () -> assertNotNull(getValue(result, "$.updatedDate")),
                 () -> assertNotNull(getValue(result, "$.updatedBy")),
                 () -> assertNotNull(getValue(result, "$.reminder")),
-                () -> assertNotNull(getValue(result, "$.reminder.alive"))
+                () -> assertEquals(true, getValue(result, "$.reminder.alive"))
+        );
+    }
+
+    @Test
+    @DisplayName("addCheckList")
+    public void successAddCheckList() throws Exception {
+
+        Card expected = EntityBuilder.getCard(repository);
+        CheckList checkList = new CheckList();
+        checkList.setName("checkList test");
+        checkList.setCreatedBy("vova");
+        checkList.setCreatedDate(LocalDateTime.now());
+        expected.setCheckList(checkList);
+
+        MvcResult result = super.update(URL, expected);
+
+        assertAll(
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertNotNull(getValue(result, "$.checkList")),
+                () -> assertEquals(expected.getCheckList().getName(), getValue(result, "$.checkList.name"))
+        );
+    }
+
+    @Test
+    @DisplayName("deleteCheckList")
+    public void successDeleteCheckList() throws Exception {
+
+        Card expected = EntityBuilder.getCardWithCheckList(repository);
+        expected.setCheckList(null);
+        MvcResult result = super.update(URL, expected);
+
+        assertAll(
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertNull(getValue(result, "$.checkList"))
+        );
+    }
+
+    @Test
+    @DisplayName("deleteCheckItem")
+    public void successDeleteCheckItem() throws Exception {
+
+        Card expected = EntityBuilder.getCardWithCheckList(repository);
+        expected.getCheckList().setItems(new ArrayList<>());
+        MvcResult result = super.update(URL, expected);
+        ArrayList value = (ArrayList) getValue(result, "$.checkList.items");
+        assertAll(
+                () -> assertNotNull(getValue(result, "$.id")),
+                () -> assertNotNull(getValue(result, "$.updatedDate")),
+                () -> assertNotNull(getValue(result, "$.updatedBy")),
+                () -> assertNotNull(getValue(result, "$.checkList")),
+                () -> assertEquals(new ArrayList<>().size(), value.size())
         );
     }
 
@@ -131,6 +189,13 @@ public class CardControllerTest extends AbstractControllerTest<Card> {
     @DisplayName("failDelete")
     public void failDelete() throws Exception {
         MvcResult result = super.delete(URL, UUID.randomUUID());
+        assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
+    }
+
+    @Test
+    @DisplayName("failFindById")
+    public void failFindById() throws Exception {
+        MvcResult result = super.readById(URL, UUID.randomUUID());
         assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
     }
 }
