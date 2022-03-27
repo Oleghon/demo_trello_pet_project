@@ -47,4 +47,9 @@ public class Card extends Resource {
     @JoinColumn(name = "reminder_id", referencedColumnName = "id")
     @JsonIgnoreProperties("card")
     private Reminder reminder;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "checklist_id", referencedColumnName = "id")
+    @JsonIgnoreProperties("card")
+    private CheckList checkList;
 }

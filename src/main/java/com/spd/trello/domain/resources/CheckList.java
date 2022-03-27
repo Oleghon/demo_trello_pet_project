@@ -1,16 +1,15 @@
 package com.spd.trello.domain.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.items.CheckableItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -21,7 +20,10 @@ public class CheckList extends Resource {
 
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            targetEntity = CheckableItem.class,
             mappedBy = "checkList")
-    @JsonIgnoreProperties("checkList")
-    private Set<CheckableItem> items = new LinkedHashSet<>();
+    @JsonManagedReference
+    @JsonIgnoreProperties(value = "checkList", allowSetters = true)
+    private List<CheckableItem> items = new ArrayList<>();
 }
