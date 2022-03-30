@@ -3,15 +3,23 @@ package com.spd.trello.service;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.exception.EntityNotFoundException;
 import com.spd.trello.repository_jpa.CommonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class AbstractService<E extends Resource, R extends CommonRepository<E>> implements CommonService<E> {
 
     R repository;
+
+    @Autowired
+    Validator validator;
 
     public AbstractService(R repository) {
         this.repository = repository;
@@ -19,8 +27,15 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
 
     @Override
     public E create(E entity) {
-        entity.setCreatedDate(LocalDateTime.now());
-        return repository.save(entity);
+
+        Set<ConstraintViolation<E>> violations = validator.validate(entity);
+        if (!violations.isEmpty()) {
+            StringBuilder message = new StringBuilder(entity.getClass().getSimpleName()).append(" not valid");
+            throw new ConstraintViolationException(message.toString(), violations);
+        } else {
+            entity.setCreatedDate(LocalDateTime.now());
+            return repository.save(entity);
+        }
     }
 
     @Override
@@ -43,7 +58,7 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
     }
 
     @Override
-    public Page<E> readAll(Pageable pageable){
+    public Page<E> readAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class Board extends Resource {
             name = "board_member",
             joinColumns = @JoinColumn(name = "board_id"))
     @Column(name = "member_id")
+    @UniqueElements(message = "member cannot be added twice")
     private List<UUID> members = new ArrayList<>();
 
     private Boolean archived = false;
