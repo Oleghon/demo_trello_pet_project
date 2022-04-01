@@ -3,14 +3,12 @@ package com.spd.trello.controller;
 import com.spd.trello.domain.items.Attachment;
 import com.spd.trello.service.AttachmentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -39,12 +37,7 @@ public class AttachmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<byte[]> getAttachment(@PathVariable UUID id) {
-        Optional<Attachment> optional = service.readById(id);
-        if (!optional.isPresent()) {
-            return ResponseEntity.notFound()
-                    .build();
-        }
-        Attachment attachment = optional.get();
+        Attachment attachment = service.readById(id);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
                 .contentType(MediaType.valueOf(attachment.getContext()))

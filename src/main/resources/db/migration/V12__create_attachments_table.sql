@@ -1,8 +1,7 @@
 CREATE TABLE attachments(
     id uuid NOT NULL PRIMARY KEY,
-    link VARCHAR(200) NOT NULL,
+    context VARCHAR(200) NOT NULL,
     name VARCHAR(200) NOT NULL,
-    file bytea NOT NULL,
-    card_id uuid CONSTRAINT attachment_card_id_fk REFERENCES cards(id) on delete cascade,
-    comment_id uuid CONSTRAINT attachment_comment_id_fk REFERENCES comments(id) on delete cascade
+    file oid NOT NULL,
+    key_id uuid
 );

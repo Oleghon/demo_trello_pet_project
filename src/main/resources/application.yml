@@ -21,8 +21,5 @@ spring:
   jackson:
     serialization:
       write_dates_as_timestamps: false
-    #  spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.PostgreSQLDialect
-  #  # Hibernate ddl auto (create, create-drop, validate, update)
-#  spring.jpa.hibernate.ddl-auto= update
   flyway:
     enabled: false
