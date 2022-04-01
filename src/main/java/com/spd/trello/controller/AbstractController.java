@@ -6,10 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
+@Validated
 public class AbstractController<E extends Resource, S extends CommonService<E>>
         implements IController<E> {
 
@@ -21,7 +24,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @PostMapping
     @Override
-    public ResponseEntity<E> create(@RequestBody E resource) {
+    public ResponseEntity<E> create(@RequestBody @Valid E resource) {
         resource.setCreatedBy("chekchek@gmail.com");
         E result = service.create(resource);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -29,7 +32,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @PutMapping("/{id}")
     @Override
-    public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody E resource) {
+    public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody @Valid E resource) {
         resource.setUpdatedBy("chekchek@gmail.com");
         E result = service.update(resource);
         return new ResponseEntity<>(result, HttpStatus.OK);
