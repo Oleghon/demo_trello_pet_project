@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.UniqueElements;
+import org.springframework.data.jpa.repository.Lock;
 
 import javax.persistence.*;
 import java.util.*;
@@ -37,11 +39,8 @@ public class Card extends Resource {
     @JoinTable(name = "label_card",
             joinColumns = @JoinColumn(name = "card_id"))
     @Column(name="label_id")
+    @UniqueElements(message = "Label cannot added twice")
     private List<UUID> labels;
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "card")
-    @JsonIgnoreProperties("card")
-    private Set<Attachment> attachments = new LinkedHashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "reminder_id", referencedColumnName = "id")

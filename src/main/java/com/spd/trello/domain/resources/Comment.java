@@ -19,10 +19,4 @@ public class Comment extends Resource {
 
     @Column(name = "card_id")
     private UUID cardId;
-
-    @OneToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.REMOVE,
-            mappedBy = "comment")
-    @JsonIgnoreProperties("comment")
-    private List<Attachment> attachments;
 }
