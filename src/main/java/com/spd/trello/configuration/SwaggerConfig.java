@@ -45,8 +45,6 @@ public class SwaggerConfig {
         List<Reminder> reminders = repository.findAllByRemindOnBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         for (Reminder reminder : reminders) {
             System.out.println("Reminder: " + reminder.getId() + "has been activated");
-            reminder.setAlive(true);
-            repository.save(reminder);
         }
     }
 }
