@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.UUID;
 
-@Validated
+
 public class AbstractController<E extends Resource, S extends CommonService<E>>
         implements IController<E> {
 

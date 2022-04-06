@@ -5,7 +5,7 @@ import com.spd.trello.repository_jpa.CardRepository;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CardService extends AbstractService<Card, CardRepository> {
+public class CardService extends ArchivedResourceService<Card, CardRepository> {
 
     public CardService(CardRepository repository) {
         super(repository);

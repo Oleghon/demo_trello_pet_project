@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class BoardService extends AbstractService<Board, BoardRepository> {
+public class BoardService extends ArchivedResourceService<Board, BoardRepository> {
     public BoardService(BoardRepository repository) {
         super(repository);
     }

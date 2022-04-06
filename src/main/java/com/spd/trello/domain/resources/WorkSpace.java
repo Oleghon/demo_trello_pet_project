@@ -8,7 +8,10 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.util.*;
+import javax.validation.constraints.NotEmpty;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -25,6 +28,7 @@ public class WorkSpace extends Resource {
             name = "space_member",
             joinColumns = @JoinColumn(name = "space_id"))
     @Column(name = "member_id")
+    @NotEmpty(message = "workSpace must contain at least one member")
     private Set<UUID> workspaceMembers = new LinkedHashSet<>();
 
     @Enumerated(EnumType.STRING)

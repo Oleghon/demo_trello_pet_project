@@ -1,5 +1,6 @@
 package com.spd.trello.domain.resources;
 
+import com.spd.trello.domain.ArchivedResource;
 import com.spd.trello.domain.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,8 +13,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "cardlists")
-public class CardList extends Resource {
+public class CardList extends ArchivedResource {
     private String name;
     private UUID boardId;
-    private Boolean archived = false;
 }

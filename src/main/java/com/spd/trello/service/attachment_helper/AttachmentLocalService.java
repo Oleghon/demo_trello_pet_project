@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
-@Component(value = "localStorage")
+@Component
 public class AttachmentLocalService extends AbstractAttachmentService {
 
     private Path rootLocation;

@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Component(value = "dbStorage")
+@Component
 public class AttachmentDBService extends AbstractAttachmentService{
 
     public AttachmentDBService(AttachmentRepository repository) {

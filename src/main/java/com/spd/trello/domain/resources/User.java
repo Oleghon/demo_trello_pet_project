@@ -1,14 +1,13 @@
 package com.spd.trello.domain.resources;
 
-import com.spd.trello.annotation.UniqueEmail;
 import com.spd.trello.domain.Resource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,7 +18,6 @@ public class User extends Resource {
     private String firstName;
     @NotBlank(message = "Lastname shouldn`t be blank")
     private String lastName;
-    @Email(message = "Not correct email")
-    @UniqueEmail(message = "Email already exist") //todo
+    @Pattern(regexp = "[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}", message = "Must be a valid email address")
     private String email;
 }
