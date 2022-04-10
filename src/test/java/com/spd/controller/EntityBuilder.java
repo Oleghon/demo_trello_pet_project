@@ -2,6 +2,7 @@ package com.spd.controller;
 
 import com.spd.trello.domain.enums.Role;
 import com.spd.trello.domain.items.CheckableItem;
+import com.spd.trello.domain.items.Reminder;
 import com.spd.trello.domain.resources.*;
 import com.spd.trello.repository_jpa.*;
 
@@ -62,6 +63,7 @@ public class EntityBuilder {
         board.setName("board test");
         board.setDescription("desc test");
         board.setCreatedDate(LocalDateTime.now());
+        board.setMembers(List.of(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c5bd4")));
         board.setCreatedBy("test");
         return board;
     }
@@ -88,11 +90,22 @@ public class EntityBuilder {
         Card card = new Card();
         card.setCardListId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
         card.setName("test");
-        card.setArchived(true);
+        card.setArchived(false);
         card.setDescription("card desc");
         card.setCreatedDate(LocalDateTime.now());
         card.setCreatedBy("test");
+        card.setAssignedMembers(Set.of(UUID.fromString("7ee897d3-9065-421d-93bd-7ad5f30c5bd4")));
         return card;
+    }
+
+    static Card getCard(CardRepository repository) {
+        return repository.save(buildCard());
+    }
+
+    static Card getCard(CardRepository repository, boolean flag){
+        Card card = buildCard();
+        card.setArchived(flag);
+        return repository.save(card);
     }
 
     static CheckList buildCheckList() {
@@ -108,8 +121,12 @@ public class EntityBuilder {
         return checkList;
     }
 
-    static Card getCard(CardRepository repository) {
-        return repository.save(buildCard());
+    static Reminder buildReminder(){
+        Reminder reminder = new Reminder();
+        reminder.setStart(LocalDateTime.now().plusSeconds(15));
+        reminder.setRemindOn(LocalDateTime.now().plusMinutes(5));
+        reminder.setEnd(LocalDateTime.now().plusHours(1));
+        return reminder;
     }
 
     static Card getCardWithCheckList(CardRepository repository) {

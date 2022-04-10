@@ -44,13 +44,14 @@ public class CardListControllerTest extends AbstractControllerTest<CardList> {
     public void successCreate() throws Exception {
         CardList expected = EntityBuilder.buildCardList();
         MvcResult result = super.create(URL, expected);
+        CardList actual = mapFromJson(result.getResponse().getContentAsString(), CardList.class);
 
         assertAll(
-                () -> assertNotNull(getValue(result, "$.id")),
-                () -> assertNotNull(getValue(result, "$.createdDate")),
-                () -> assertNotNull(getValue(result, "$.createdBy")),
-                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
-                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
+                () -> assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus()),
+                () -> assertNotNull(actual.getId()),
+                () -> assertNotNull(actual.getCreatedBy()),
+                () -> assertNotNull(actual.getCreatedDate()),
+                () -> assertEquals(expected.getName(), actual.getName())
         );
     }
 
@@ -58,18 +59,39 @@ public class CardListControllerTest extends AbstractControllerTest<CardList> {
     @DisplayName("update")
     public void successUpdate() throws Exception {
         CardList expected = EntityBuilder.getCardList(repository);
-
         expected.setName("test2");
-        expected.setArchived(true);
 
         MvcResult result = super.update(URL, expected);
+        CardList actual = mapFromJson(result.getResponse().getContentAsString(), CardList.class);
 
         assertAll(
-                () -> assertNotNull(getValue(result, "$.id")),
-                () -> assertNotNull(getValue(result, "$.updatedDate")),
-                () -> assertNotNull(getValue(result, "$.updatedBy")),
-                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
-                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus()),
+                () -> assertNotNull(actual.getId()),
+                () -> assertEquals(expected.getCreatedBy(), actual.getCreatedBy()),
+                () -> assertNotNull(actual.getUpdatedBy()),
+                () -> assertNotNull(actual.getUpdatedDate()),
+                () -> assertEquals(expected.getName(), actual.getName())
+        );
+    }
+
+    @Test
+    @DisplayName("successArchiving")
+    public void successArchiving() throws Exception {
+        CardList unexpected = EntityBuilder.getCardList(repository);
+        unexpected.setName("test2");
+        unexpected.setArchived(true);
+
+        MvcResult result = super.update(URL, unexpected);
+        CardList actual = mapFromJson(result.getResponse().getContentAsString(), CardList.class);
+
+        assertAll(
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus()),
+                () -> assertNotNull(actual.getId()),
+                () -> assertNull(actual.getUpdatedBy()),
+                () -> assertNull(actual.getUpdatedDate()),
+                () -> assertEquals(unexpected.getArchived(), actual.getArchived()),
+                () -> assertEquals(unexpected.getCreatedBy(), actual.getCreatedBy()),
+                () -> assertNotEquals(unexpected.getName(), actual.getName())
         );
     }
 
@@ -80,12 +102,14 @@ public class CardListControllerTest extends AbstractControllerTest<CardList> {
         expected.setId(UUID.fromString("7ee897d3-9065-885d-93bd-4ad6f30c5fd4"));
 
         MvcResult result = super.readById(URL, expected.getId());
+        CardList actual = mapFromJson(result.getResponse().getContentAsString(), CardList.class);
 
         assertAll(
-                () -> assertNotNull(getValue(result, "$.createdDate")),
-                () -> assertNotNull(getValue(result, "$.id")),
-                () -> assertNotNull(getValue(result, "$.createdBy")),
-                () -> assertNotNull(getValue(result, "$.name"))
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus()),
+                () -> assertNotNull(actual.getId()),
+                () -> assertNotNull(actual.getCreatedBy()),
+                () -> assertNotNull(actual.getCreatedDate()),
+                () -> assertNotNull(actual.getName())
         );
     }
 
@@ -94,13 +118,14 @@ public class CardListControllerTest extends AbstractControllerTest<CardList> {
     public void successDelete() throws Exception {
         CardList expected = EntityBuilder.getCardList(repository);
         MvcResult result = super.delete(URL, expected.getId());
+        CardList actual = mapFromJson(result.getResponse().getContentAsString(), CardList.class);
 
         assertAll(
-                () -> assertNotNull(getValue(result, "$.id")),
-                () -> assertNotNull(getValue(result, "$.createdDate")),
-                () -> assertNotNull(getValue(result, "$.createdBy")),
-                () -> assertEquals(expected.getName(), getValue(result, "$.name")),
-                () -> assertEquals(expected.getArchived(), getValue(result, "$.archived"))
+                () -> assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus()),
+                () -> assertNotNull(actual.getId()),
+                () -> assertNotNull(actual.getCreatedBy()),
+                () -> assertNotNull(actual.getCreatedDate()),
+                () -> assertEquals(expected.getName(), actual.getName())
         );
     }
 

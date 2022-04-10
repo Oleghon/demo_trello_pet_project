@@ -11,8 +11,9 @@ import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -33,7 +34,7 @@ public class Card extends ArchivedResource {
             joinColumns = @JoinColumn(name = "card_id"))
     @Column(name = "member_id")
     @NotEmpty(message = "card must contain at least one member")
-    private List<UUID> assignedMembers = new ArrayList<>();
+    private Set<UUID> assignedMembers = new HashSet<>();
 
     @ElementCollection
     @LazyCollection(LazyCollectionOption.FALSE)

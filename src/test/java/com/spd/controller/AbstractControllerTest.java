@@ -11,8 +11,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -23,6 +21,7 @@ public class AbstractControllerTest<E extends Resource> {
 
     @Autowired
     protected MockMvc mvc;
+    protected ObjectMapper mapper = new ObjectMapper();
 
     public MvcResult create(String uri, E entity) throws Exception {
         String content = mapToJson(entity);
@@ -59,18 +58,14 @@ public class AbstractControllerTest<E extends Resource> {
     }
 
     protected String mapToJson(Object obj) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        return objectMapper.writeValueAsString(obj);
+        return mapper.writeValueAsString(obj);
     }
 
     protected Object getValue(MvcResult mvcResult, String jsonPath) throws UnsupportedEncodingException {
-        if (jsonPath.matches("Date")) {
-            Object read = JsonPath.read(mvcResult.getResponse().getContentAsString(), jsonPath);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            return LocalDateTime.parse(read.toString(), formatter);
-        }
         return JsonPath.read(mvcResult.getResponse().getContentAsString(), jsonPath);
     }
 
+    protected E mapFromJson(String json, Class<E> clazz) throws JsonProcessingException {
+        return this.mapper.readValue(json, clazz);
+    }
 }

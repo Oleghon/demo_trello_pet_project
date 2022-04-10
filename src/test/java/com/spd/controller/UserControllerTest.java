@@ -54,13 +54,31 @@ public class UserControllerTest extends AbstractControllerTest<User> {
     }
 
     @Test
+    @DisplayName("failCreate")
+    public void failCreateValidation() throws Exception {
+        User unexpected = EntityBuilder.buildUser();
+        unexpected.setEmail("test");
+        unexpected.setFirstName(" ");
+        unexpected.setLastName(" ");
+        String[] expectedArray = new String[3];
+        MvcResult result = super.create(URL, unexpected);
+        Object value = getValue(result, "$.details");
+        String[] split = value.toString().replaceAll("[\"\\[\\]]", "").split(",");
+        assertAll(
+                () -> assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus()),
+                ()-> assertEquals("User not valid", getValue(result, "$.message")),
+                () -> assertEquals(expectedArray.length, split.length)
+        );
+    }
+
+    @Test
     @DisplayName("update")
     public void successUpdate() throws Exception {
         User expected = EntityBuilder.getUser(repository);
 
         expected.setFirstName("test2");
         expected.setLastName("test2");
-        expected.setEmail("test2");
+        expected.setEmail("test2@test.com");
 
         MvcResult result = super.update(URL, expected);
 
@@ -96,7 +114,7 @@ public class UserControllerTest extends AbstractControllerTest<User> {
 
     @Test
     @DisplayName("failReadById")
-    public void failReadById() throws Exception{
+    public void failReadById() throws Exception {
         MvcResult result = super.readById(URL, UUID.randomUUID());
         assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
     }
