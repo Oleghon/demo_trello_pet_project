@@ -16,8 +16,9 @@ public abstract class AbstractAttachmentService implements CommonAttachmentServi
         this.repository = repository;
     }
 
-    public Attachment convert(MultipartFile file) {
+    public Attachment convert(MultipartFile file, UUID keyId) {
         Attachment attachment = new Attachment();
+        attachment.setKeyId(keyId);
         attachment.setName(file.getOriginalFilename());
         attachment.setContext(file.getContentType());
         return attachment;

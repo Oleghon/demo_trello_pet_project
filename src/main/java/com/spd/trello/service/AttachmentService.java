@@ -23,10 +23,10 @@ public class AttachmentService {
         this.localService = localService;
     }
 
-    public Attachment save(MultipartFile file) throws IOException {
+    public Attachment save(MultipartFile file, UUID keyId) throws IOException {
         if (storageProperties.getLocation().equals("db"))
-            return dbService.load(file);
-        return localService.load(file);
+            return dbService.load(file, keyId);
+        return localService.load(file, keyId);
     }
 
     public Attachment readById(UUID id) {

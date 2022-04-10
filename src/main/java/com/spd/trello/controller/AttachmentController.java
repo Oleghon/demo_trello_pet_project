@@ -23,15 +23,18 @@ public class AttachmentController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<byte[]> upload(@RequestParam("file") MultipartFile file, @RequestParam("id") UUID id) {
         try {
-            Attachment attachment = service.save(file);
+            Attachment attachment = service.save(file, id);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            " attachment id = \"" + attachment.getId()
+                                    + "\" filename = \"" + attachment.getName()
+                                    + "\", foreign key = \"" + attachment.getKeyId() + "\"")
                     .contentType(MediaType.valueOf(attachment.getContext()))
                     .body(attachment.getFile());
         } catch (Exception e) {
-                  throw new IllegalArgumentException("Could not upload the file! " + e);
+            throw new IllegalArgumentException("Could not upload the file! " + e);
         }
     }
 
@@ -39,7 +42,10 @@ public class AttachmentController {
     public ResponseEntity<byte[]> getAttachment(@PathVariable UUID id) {
         Attachment attachment = service.readById(id);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
+                 .header(HttpHeaders.CONTENT_DISPOSITION,
+                            " attachment id = \"" + attachment.getId()
+                                    + "\" filename = \"" + attachment.getName()
+                                    + "\", foreign key = \"" + attachment.getKeyId() + "\"")
                 .contentType(MediaType.valueOf(attachment.getContext()))
                 .body(attachment.getFile());
     }

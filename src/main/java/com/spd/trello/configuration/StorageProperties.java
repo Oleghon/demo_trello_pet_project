@@ -1,15 +1,16 @@
 package com.spd.trello.configuration;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 
 @Data
-@PropertySource(value = "/properties/application_local_storage.yml")
 @Component
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "storage")
 public class StorageProperties {
-    @Value("${location}")
+
     private String location;
 }

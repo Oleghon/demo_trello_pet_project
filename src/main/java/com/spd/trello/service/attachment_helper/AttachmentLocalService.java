@@ -39,8 +39,8 @@ public class AttachmentLocalService extends AbstractAttachmentService {
     }
 
     @Override
-    public Attachment load(MultipartFile file) {
-        Attachment attachment = convert(file);
+    public Attachment load(MultipartFile file, UUID keyId) {
+        Attachment attachment = convert(file, keyId);
         if (store(file)) {
             attachment.setFile(null);
             return repository.save(attachment);

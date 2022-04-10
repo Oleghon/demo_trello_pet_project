@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface CommonAttachmentService {
 
-    Attachment load(MultipartFile file);
+    Attachment load(MultipartFile file, UUID keyId);
 
     Attachment readById(UUID id);
 }
