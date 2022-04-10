@@ -16,8 +16,14 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler<T extends Domain> {
 
-    @ExceptionHandler(value = {IllegalArgumentException.class, EntityNotFoundException.class})
+    @ExceptionHandler(value = {IllegalArgumentException.class})
     protected ResponseEntity<Object> handle(RuntimeException ex, WebRequest request) {
+        String responseBody = ex.getMessage();
+        return new ResponseEntity(responseBody, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {EntityNotFoundException.class})
+    protected ResponseEntity<Object> handleEntityNotFound(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
         return new ResponseEntity(responseBody, HttpStatus.BAD_REQUEST);
     }
