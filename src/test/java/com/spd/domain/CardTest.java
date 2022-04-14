@@ -57,14 +57,12 @@ public class CardTest extends BaseTest {
         card.setUpdatedBy("test");
         card.setName("new name");
         card.setDescription("new desc");
-        card.setArchived(true);
         Card actual = service.update(card);
 
         assertAll(
                 () -> assertNotNull(actual.getUpdatedDate()),
                 () -> assertEquals(card.getUpdatedBy(), actual.getUpdatedBy()),
-                () -> assertEquals(card.getName(), actual.getName()),
-                () -> assertTrue(card.getArchived())
+                () -> assertEquals(card.getName(), actual.getName())
         );
 
         verify(repository, times(1)).findById(any());

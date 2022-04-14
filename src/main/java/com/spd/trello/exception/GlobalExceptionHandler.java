@@ -25,7 +25,7 @@ public class GlobalExceptionHandler<T extends Domain> {
     @ExceptionHandler(value = {EntityNotFoundException.class})
     protected ResponseEntity<Object> handleEntityNotFound(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
-        return new ResponseEntity(responseBody, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(responseBody, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
