@@ -1,6 +1,9 @@
-package com.spd.trello.security;
+package com.spd.trello.controller;
 
 import com.spd.trello.domain.resources.User;
+import com.spd.trello.security.AuthenticationRequest;
+import com.spd.trello.security.JwtTokenProvider;
+import com.spd.trello.security.RegistrationRequest;
 import com.spd.trello.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +53,23 @@ public class AuthenticationController {
             return new ResponseEntity<>("Invalid email/password combination", HttpStatus.FORBIDDEN);
         }
     }
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request){
+        if(userService.findUserByEmail(request.getEmail()).isPresent()){
+            return new ResponseEntity<>("Email already exist!", HttpStatus.BAD_REQUEST);
+        }
+        request.setPassword(encoder.encode(request.getPassword()));
+        User save = userService.save(request);
+        String token = tokenProvider.createToken(request.getEmail(), request.getPassword());
+        Map<Object, Object> response = new HashMap<>();
+        response.put("firstname", save.getFirstName());
+        response.put("lastname", save.getLastName());
+        response.put("email", save.getEmail());
+        response.put("password", save.getPassword());
+        response.put("token", token);
 
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
