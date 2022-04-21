@@ -53,8 +53,9 @@ public class AuthenticationController {
             return new ResponseEntity<>("Invalid email/password combination", HttpStatus.FORBIDDEN);
         }
     }
+
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody RegistrationRequest request){
+    public ResponseEntity<?> registration(@RequestBody RegistrationRequest request){
         if(userService.findUserByEmail(request.getEmail()).isPresent()){
             return new ResponseEntity<>("Email already exist!", HttpStatus.BAD_REQUEST);
         }
@@ -74,6 +75,7 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+        logoutHandler.setClearAuthentication(true);
         logoutHandler.logout(request, response, null);
     }
 }

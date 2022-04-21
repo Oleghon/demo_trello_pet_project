@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface IController<E extends Resource> {
 
-    ResponseEntity<E> create(E resource, Principal principal);
+    ResponseEntity<E> create(E resource);
 
-    ResponseEntity<E> update(UUID id, E resource, Principal principal);
+    ResponseEntity<E> update(UUID id, E resource);
 
     ResponseEntity<E> readById(UUID id);
 

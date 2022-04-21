@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.UUID;
 
 
@@ -25,9 +25,8 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @PostMapping
     @Override
-    @PreAuthorize("hasAuthority('write')")
-    public ResponseEntity<E> create(@RequestBody @Valid E resource, Principal principal) {
-        resource.setCreatedBy(principal.getName());
+    @PreAuthorize("hasAnyAuthority('write', 'workspace:write')")
+    public ResponseEntity<E> create(@RequestBody @Valid E resource) {
         E result = service.create(resource);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
@@ -35,8 +34,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
     @PutMapping("/{id}")
     @Override
     @PreAuthorize("hasAuthority('update')")
-    public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody @Valid E resource, Principal principal) {
-        resource.setUpdatedBy(principal.getName());
+    public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody @Valid E resource) {
         E result = service.update(resource);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
