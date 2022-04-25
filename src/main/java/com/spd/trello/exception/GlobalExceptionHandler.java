@@ -28,6 +28,12 @@ public class GlobalExceptionHandler<T extends Domain> {
         return new ResponseEntity(responseBody, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = {SecurityAccessException.class})
+    protected ResponseEntity<Object> handleSecurityExc(SecurityAccessException ex) {
+        String responseBody = ex.getMessage();
+        return new ResponseEntity(responseBody, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {

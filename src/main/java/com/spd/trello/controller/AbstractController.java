@@ -25,7 +25,6 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @PostMapping
     @Override
-    @PreAuthorize("hasAnyAuthority('write', 'workspace:write')")
     public ResponseEntity<E> create(@RequestBody @Valid E resource) {
         E result = service.create(resource);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -33,7 +32,6 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @PutMapping("/{id}")
     @Override
-    @PreAuthorize("hasAuthority('update')")
     public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody @Valid E resource) {
         E result = service.update(resource);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -41,7 +39,6 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @GetMapping("/{id}")
     @Override
-    @PreAuthorize("hasAuthority('read')")
     public ResponseEntity<E> readById(@PathVariable UUID id) {
         E result = service.readById(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -49,7 +46,6 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @DeleteMapping("/{id}")
     @Override
-    @PreAuthorize("hasAuthority('write')")
     public ResponseEntity<E> delete(@PathVariable UUID id) {
         E result = service.delete(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -57,7 +53,6 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
 
     @GetMapping
     @Override
-    @PreAuthorize("hasAuthority('read')")
     public Page<E> readAll(Pageable pageable) {
         return service.readAll(pageable);
     }
