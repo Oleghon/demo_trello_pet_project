@@ -33,6 +33,7 @@ public class AbstractController<E extends Resource, S extends CommonService<E>>
     @PutMapping("/{id}")
     @Override
     public ResponseEntity<E> update(@PathVariable UUID id, @RequestBody @Valid E resource) {
+        resource.setId(id);
         E result = service.update(resource);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

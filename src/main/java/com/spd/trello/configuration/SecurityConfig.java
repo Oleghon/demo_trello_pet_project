@@ -1,7 +1,7 @@
 package com.spd.trello.configuration;
 
-import com.spd.trello.security.CustomFilter;
 import com.spd.trello.security.JwtConfigurer;
+import com.spd.trello.security.extrafilter.CustomFilterConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,9 +19,9 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtConfigurer jwtConfigurer;
-    private final CustomFilter customFilter;
+    private final CustomFilterConfigurer customFilter;
 
-    public SecurityConfig(JwtConfigurer jwtConfigurer, CustomFilter customFilter) {
+    public SecurityConfig(JwtConfigurer jwtConfigurer, CustomFilterConfigurer customFilter) {
         this.jwtConfigurer = jwtConfigurer;
         this.customFilter = customFilter;
     }
@@ -37,11 +36,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/").permitAll()
                 .antMatchers("/auth/signup").permitAll()
                 .antMatchers("/auth/login").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/swagger-resources").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
+                .antMatchers("/configuration/ui").permitAll()
+                .antMatchers("/configuration/security").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(jwtConfigurer)
                 .and()
-                .addFilterAfter(customFilter, BasicAuthenticationFilter.class);
+                .apply(customFilter);
     }
 
     @Bean
