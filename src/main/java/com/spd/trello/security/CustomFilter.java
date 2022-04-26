@@ -1,9 +1,10 @@
 package com.spd.trello.security;
 
 import com.spd.trello.exception.SecurityAccessException;
-import com.spd.trello.security.extrafilter.WorkspaceChecker;
+import com.spd.trello.security.extrafilter.AccessRightsCheckerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -19,28 +20,26 @@ import java.io.IOException;
 @Component
 public class CustomFilter extends GenericFilterBean {
 
-    private final WorkspaceChecker checker;
-
-    @Qualifier("handlerExceptionResolver")
+    private AccessRightsCheckerFactory checker;
+    @Autowired
+    @Qualifier(value = "handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 
     @Autowired
-    public CustomFilter(WorkspaceChecker checker, HandlerExceptionResolver resolver) {
+    public CustomFilter(AccessRightsCheckerFactory checker) {
         this.checker = checker;
-        this.resolver = resolver;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         try {
-            if (httpServletRequest.getRequestURI().contains("workspaces")) {
-                if (!checker.checkAuthority(httpServletRequest))
-                    throw new SecurityAccessException("Not have enough access rights");
-            }
-            chain.doFilter(request, response);
+            if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+                checker.checkAccess(httpServletRequest);
+            } else throw new SecurityAccessException();
         } catch (Exception e) {
-            resolver.resolveException(httpServletRequest, (HttpServletResponse) response, null, e);
+            this.resolver.resolveException(httpServletRequest, (HttpServletResponse) response, null, e);
         }
+        chain.doFilter(request, response);
     }
 }

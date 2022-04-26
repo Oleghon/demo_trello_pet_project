@@ -1,6 +1,5 @@
 package com.spd.trello.domain.resources;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.domain.enums.Role;
@@ -10,7 +9,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -35,4 +33,24 @@ public class Member extends Resource {
     @Column(name = "space_id")
     @JsonIgnore
     private Set<UUID> workspaces = new LinkedHashSet<>();
+
+    @ElementCollection
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @CollectionTable(
+            name = "board_member",
+            joinColumns = @JoinColumn(name = "member_id"))
+    @Column(name = "board_id")
+    @JsonIgnore
+    private Set<UUID> boards = new LinkedHashSet<>();
+
+    @ElementCollection
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @CollectionTable(
+            name = "card_member",
+            joinColumns = @JoinColumn(name = "member_id"))
+    @Column(name = "card_id")
+    @JsonIgnore
+    private Set<UUID> cards = new LinkedHashSet<>();
+
+
 }
