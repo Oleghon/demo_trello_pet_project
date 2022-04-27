@@ -30,7 +30,7 @@ public class CardListChecker extends AbstractChecker<CardList, CardListRepositor
     }
 
     private Member getMemberByParent(UUID userId, UUID parentId) {
-        List<Member> members = memberRepository.findByUserIdAndWorkspacesExists(userId, parentId);
+        List<Member> members = memberRepository.findByUserIdAndBoardsExists(userId, parentId);
         if (!members.isEmpty())
             members.get(0);
         throw new SecurityAccessException("User with id: " + userId + " does not have access to modify board");

@@ -1,10 +1,9 @@
-package com.spd.trello.security;
+package com.spd.trello.security.extrafilter;
 
 import com.spd.trello.exception.SecurityAccessException;
 import com.spd.trello.security.extrafilter.AccessRightsCheckerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -25,6 +24,8 @@ public class CustomFilter extends GenericFilterBean {
     @Qualifier(value = "handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
 
+    private static final String FILTER_APPLIED = "__spring_security_customFilter_filter_Applied";
+
     @Autowired
     public CustomFilter(AccessRightsCheckerFactory checker) {
         this.checker = checker;
@@ -34,8 +35,9 @@ public class CustomFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         try {
-            if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+            if (request.getAttribute(FILTER_APPLIED) != null) {
                 checker.checkAccess(httpServletRequest);
+                request.setAttribute(FILTER_APPLIED, true);
             } else throw new SecurityAccessException();
         } catch (Exception e) {
             this.resolver.resolveException(httpServletRequest, (HttpServletResponse) response, null, e);

@@ -60,7 +60,6 @@ public abstract class AbstractChecker<E extends Domain, R extends CommonReposito
 
     protected abstract void checkEntityAccessRights(UUID entityId, User user);
 
-    //todo
     protected E readFromJson(HttpServletRequest request, Class<E> clazz) {
         try {
             return mapper.readValue(request.getInputStream(), clazz);
