@@ -1,5 +1,6 @@
 package com.spd.trello.service;
 
+import com.spd.trello.annotation.Debug;
 import com.spd.trello.domain.Resource;
 import com.spd.trello.exception.EntityNotFoundException;
 import com.spd.trello.repository_jpa.CommonRepository;
@@ -16,22 +17,26 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
         this.repository = repository;
     }
 
+    @Debug
     @Override
     public E create(E entity) {
         return repository.save(entity);
     }
 
+    @Debug
     @Override
     public E update(E entity) {
         readById(entity.getId());
         return repository.save(entity);
     }
 
+    @Debug
     @Override
     public E readById(UUID id) {
         return repository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
+    @Debug
     @Override
     public E delete(UUID id) {
         E result = readById(id);
@@ -39,6 +44,7 @@ public abstract class AbstractService<E extends Resource, R extends CommonReposi
         return result;
     }
 
+    @Debug
     @Override
     public Page<E> readAll(Pageable pageable) {
         return repository.findAll(pageable);

@@ -5,9 +5,11 @@ spring:
     password: '****'
     hikari:
       maximum-pool-size: 10
+
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
   jpa:
     show-sql: true
     properties:
@@ -22,11 +24,23 @@ spring:
             non_contextual_creation: true
     hibernate:
       ddl-auto: update
+
   jackson:
     serialization:
       write_dates_as_timestamps: false
+
   flyway:
     enabled: false
   profiles:
     include:
       - storage
+
+logging:
+  level:
+    org:
+      springframework:
+        web: info
+      hibernate: error
+    com:
+      spd:
+        trello: debug
