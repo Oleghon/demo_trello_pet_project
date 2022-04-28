@@ -2,13 +2,10 @@ package com.spd.trello.domain.resources;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spd.trello.domain.Resource;
-import com.spd.trello.domain.enums.Role;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -26,6 +23,4 @@ public class User extends Resource {
     private String email;
     @JsonIgnore
     private String password;
-    @Enumerated(value = EnumType.STRING)
-    private Role role = Role.GUEST;
 }

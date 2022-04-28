@@ -1,5 +1,6 @@
 package com.spd.trello.security;
 
+import com.spd.trello.domain.enums.Role;
 import com.spd.trello.domain.resources.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +25,7 @@ public class SecureUser implements UserDetails {
 
     public static UserDetails fromUser(User user) {
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPassword(), user.getRole().getAuthorities());
+                user.getEmail(), user.getPassword(), Role.GUEST.getAuthorities());
     }
 
     @Override
