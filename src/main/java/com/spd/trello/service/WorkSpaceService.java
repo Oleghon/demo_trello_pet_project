@@ -1,12 +1,28 @@
 package com.spd.trello.service;
 
+import com.spd.trello.domain.resources.Member;
 import com.spd.trello.domain.resources.WorkSpace;
 import com.spd.trello.repository_jpa.WorkspaceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
+@Slf4j
 public class WorkSpaceService extends AbstractService<WorkSpace, WorkspaceRepository> {
-    public WorkSpaceService(WorkspaceRepository repository) {
+    private MemberService memberService;
+
+    public WorkSpaceService(WorkspaceRepository repository, MemberService memberService) {
         super(repository);
+        this.memberService = memberService;
+    }
+
+    public WorkSpace addMember(UUID id, Member member) {
+        WorkSpace workSpace = super.readById(id);
+        Member checkedMember = memberService.findByUserIdAndRole(member.getUserId(), member.getRole());
+        workSpace.getWorkspaceMembers().add(checkedMember.getId());
+        log.info("member successfully added to workspace");
+        return super.create(workSpace);
     }
 }

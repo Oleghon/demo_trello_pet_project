@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class AbstractChecker<E extends Domain, R extends CommonRepository<E>> implements ExtraAuthorizationChecker<E> {
@@ -48,7 +49,10 @@ public abstract class AbstractChecker<E extends Domain, R extends CommonReposito
                 checkMembership(getIdFromRequest(uri), user, Permission.WRITE);
                 break;
             case "POST":
-                checkPostRequest(request, user);
+                if (uri.contains("/add_member"))
+                    checkMembership(getSpecialIdFromRequest(uri), user, Permission.WRITE);
+                else
+                    checkPostRequest(request, user);
                 break;
         }
     }
@@ -69,8 +73,14 @@ public abstract class AbstractChecker<E extends Domain, R extends CommonReposito
         }
     }
 
+
     private UUID getIdFromRequest(String request) {
         return UUID.fromString(request.replaceAll(regex.pattern(), ""));
+    }
+
+    private UUID getSpecialIdFromRequest(String request) {
+        Matcher pattern = Pattern.compile("(\\w|\\d)+-(\\w|\\d){4}-(\\w|\\d){4}-(\\w|\\d){4}-(\\w|\\d)+").matcher(request);
+        return UUID.fromString(pattern.group());
     }
 
     private User getAuthorizedUser() {
