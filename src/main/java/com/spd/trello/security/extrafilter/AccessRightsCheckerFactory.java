@@ -11,25 +11,28 @@ public class AccessRightsCheckerFactory {
     private WorkspaceChecker workspaceChecker;
     private BoardChecker boardChecker;
     private CardListChecker cardListChecker;
+    private CommentChecker commentChecker;
 
     @Autowired
-    public AccessRightsCheckerFactory(CardChecker cardChecker, WorkspaceChecker workspaceChecker, BoardChecker boardChecker, CardListChecker cardListChecker) {
+    public AccessRightsCheckerFactory(CardChecker cardChecker, WorkspaceChecker workspaceChecker, BoardChecker boardChecker, CardListChecker cardListChecker, CommentChecker commentChecker) {
         this.cardChecker = cardChecker;
         this.workspaceChecker = workspaceChecker;
         this.boardChecker = boardChecker;
         this.cardListChecker = cardListChecker;
+        this.commentChecker = commentChecker;
     }
 
     public void checkAccess(HttpServletRequest request) {
         String uri = request.getRequestURI();
         if (uri.contains("workspaces"))
             workspaceChecker.checkAuthority(request);
-        if (uri.contains("boards"))
+        else if (uri.contains("boards"))
             boardChecker.checkAuthority(request);
-        if (uri.contains("cards"))
+        else if (uri.contains("cards"))
             cardChecker.checkAuthority(request);
-        if (uri.contains("cardlists"))
+        else if (uri.contains("cardlists"))
             cardListChecker.checkAuthority(request);
-
+        else if (uri.contains("comments"))
+            commentChecker.checkAuthority(request);
     }
 }

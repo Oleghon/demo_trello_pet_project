@@ -1,6 +1,7 @@
 package com.spd.trello.exception;
 
 import com.spd.trello.domain.Domain;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,18 +14,21 @@ import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler<T extends Domain> {
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     protected ResponseEntity<Object> handle(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
+        log.error(ex.getMessage());
         return new ResponseEntity(responseBody, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {EntityNotFoundException.class})
     protected ResponseEntity<Object> handleEntityNotFound(RuntimeException ex, WebRequest request) {
         String responseBody = ex.getMessage();
+        log.error(ex.getMessage());
         return new ResponseEntity(responseBody, HttpStatus.NOT_FOUND);
     }
 

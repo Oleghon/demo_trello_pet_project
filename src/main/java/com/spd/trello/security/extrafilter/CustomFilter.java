@@ -2,6 +2,7 @@ package com.spd.trello.security.extrafilter;
 
 import com.spd.trello.configuration.UserContextHolder;
 import com.spd.trello.security.extrafilter.wrapper.BufferedServletRequestWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
+@Slf4j
 @Component
 public class CustomFilter extends GenericFilterBean {
 
@@ -40,6 +41,7 @@ public class CustomFilter extends GenericFilterBean {
             if (request.getAttribute(FILTER_APPLIED) == null) {
                 checker.checkAccess(wrappedRequest);
                 request.setAttribute(FILTER_APPLIED, true);
+                log.info("request has been successfully filtered");
                 chain.doFilter(wrappedRequest, response);
             } else {
                 UserContextHolder.cleanUserContext(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -47,6 +49,7 @@ public class CustomFilter extends GenericFilterBean {
             }
         } catch (Exception e) {
             request.setAttribute(FILTER_APPLIED, false);
+            log.error(e.getMessage());
             this.resolver.resolveException(httpServletRequest, (HttpServletResponse) response, null, e);
         }
     }

@@ -13,8 +13,8 @@ import java.util.Arrays;
 
 import static java.util.stream.Collectors.joining;
 
-@Aspect
-@Component
+//@Aspect
+//@Component
 public class LoggingAspect {
 
     @Pointcut("within(com.spd.trello*)" +
