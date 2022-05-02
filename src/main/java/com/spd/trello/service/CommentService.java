@@ -13,8 +13,4 @@ public class CommentService extends AbstractService<Comment, CommentRepository> 
     public CommentService(CommentRepository repository) {
         super(repository);
     }
-
-    public List<Comment> findAllByCard(UUID id){
-        return repository.findCommentsByCardId(id);
-    }
 }

@@ -1,5 +1,6 @@
 package com.spd.trello.security.extrafilter;
 
+import com.spd.trello.configuration.UserContextHolder;
 import com.spd.trello.domain.enums.Permission;
 import com.spd.trello.domain.enums.WorkSpaceVisibility;
 import com.spd.trello.domain.resources.Member;
@@ -26,27 +27,29 @@ public class WorkspaceChecker extends AbstractChecker<WorkSpace, WorkspaceReposi
 
     @Override
     protected void checkMembership(UUID entityId, User user, Permission permission) {
-        Member member = findMemberBy(entityId, user.getId());
+        WorkSpace workSpace = entityRepository.findById(entityId).get();
+        Member member = findMemberBy(workSpace, user);
         if (!member.getRole().getPermissions().contains(permission))
-            throw new SecurityAccessException("Member does not have enough access rights");
+            throw new SecurityAccessException("Member does not have enough access rights to modify workspace");
     }
 
     @Override
-    protected Member findMemberBy(UUID entityId, UUID userId) {
-        List<Member> members = memberRepository.findByUserIdAndWorkspacesExists(userId, entityId);
-        if (!members.isEmpty())
-            return members.get(0);
-        throw new SecurityAccessException("User with id: " + userId + " does not have access to workspace");
+    protected Member findMemberBy(WorkSpace workSpace, User user) {
+        List<Member> members = UserContextHolder.getMembersContext(user.getEmail());
+        return members.stream()
+                .filter(member -> workSpace.getWorkspaceMembers().contains(member.getId()))
+                .findFirst()
+                .orElseThrow(() -> new SecurityAccessException("User: " + user.getEmail() + " does not have access to workspace"));
     }
 
     @Override
     protected void checkEntityAccessRights(UUID entityId, User user) {
         WorkSpace workSpace = entityRepository.findById(entityId).get();
         if (workSpace.getVisibility() == WorkSpaceVisibility.PRIVATE)
-            findMemberBy(entityId, user.getId());
+            findMemberBy(workSpace, user);
     }
 
     @Override
-    protected void checkPostRequest(HttpServletRequest request, UUID userId) {
+    protected void checkPostRequest(HttpServletRequest request, User userId) {
     }
 }

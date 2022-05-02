@@ -1,6 +1,7 @@
 package com.spd.trello.security.extrafilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spd.trello.configuration.UserContextHolder;
 import com.spd.trello.domain.Domain;
 import com.spd.trello.domain.enums.Permission;
 import com.spd.trello.domain.resources.Member;
@@ -47,16 +48,16 @@ public abstract class AbstractChecker<E extends Domain, R extends CommonReposito
                 checkMembership(getIdFromRequest(uri), user, Permission.WRITE);
                 break;
             case "POST":
-                checkPostRequest(request, user.getId());
+                checkPostRequest(request, user);
                 break;
         }
     }
 
-    protected abstract void checkPostRequest(HttpServletRequest request, UUID userId);
+    protected abstract void checkPostRequest(HttpServletRequest request, User user);
 
     protected abstract void checkMembership(UUID entityId, User user, Permission permission);
 
-    protected abstract Member findMemberBy(UUID entityId, UUID userId);
+    protected abstract Member findMemberBy(E entity, User user);
 
     protected abstract void checkEntityAccessRights(UUID entityId, User user);
 
@@ -75,6 +76,14 @@ public abstract class AbstractChecker<E extends Domain, R extends CommonReposito
     private User getAuthorizedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User userByEmail = userRepository.findUserByEmail(authentication.getName()).get();
+        UserContextHolder contextHolder = new UserContextHolder(userByEmail, memberRepository);
+        try {
+            Thread thread = new Thread(contextHolder);
+            thread.start();
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new IllegalArgumentException(e);
+        }
         return userByEmail;
     }
 }

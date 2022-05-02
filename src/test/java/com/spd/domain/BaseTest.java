@@ -34,7 +34,7 @@ public class BaseTest {
 
         member = new Member();
         member.setId(UUID.fromString("7ee897d3-9065-421d-93bd-7ad7f30c4bd9"));
-        member.setUser(user);
+        member.setUserId(user.getId());
         member.setRole(Role.ADMIN);
         workSpace = new WorkSpace();
 

@@ -8,5 +8,4 @@ import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends CommonRepository<Comment> {
-    List<Comment> findCommentsByCardId(UUID id);
 }
