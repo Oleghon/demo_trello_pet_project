@@ -36,7 +36,8 @@ public class LocalScheduler {
     }
 
     @Scheduled(fixedRate = 60000)
-    public void runReminder() throws InterruptedException {
+    public void runReminder() {
+        MailSender.setSendMails(0);
         List<Reminder> activeReminders =
                 repository.findAllByRemindOnBetween(LocalDateTime.now().minusMinutes(1), LocalDateTime.now());
         log.info("reminders activated: " + activeReminders.size());
@@ -47,7 +48,5 @@ public class LocalScheduler {
             mailSender.setCardName(card.getName());
             executorService.execute(mailSender);
         });
-        log.debug("The mail has been sent: " + MailSender.getSendMails());
-        MailSender.setSendMails(0);
     }
 }

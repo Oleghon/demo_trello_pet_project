@@ -25,7 +25,7 @@ public class MailSender implements Runnable {
     public void run() {
         mailSenderService.send("o.cherepnin@istu.edu.ua", "remind " + this.cardName, "Reminder has been activated");
         sendMails.incrementAndGet();
-        log.info(cardName + " was sent");
+        log.info("{} was sent: {}",cardName, sendMails);
     }
 
     public static AtomicInteger getSendMails() {

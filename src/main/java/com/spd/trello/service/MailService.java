@@ -2,6 +2,7 @@ package com.spd.trello.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,23 +17,17 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public boolean send(String to, String subject, String content) {
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
+    public void send(String toEmail, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("cherepnin11@gmail.com");
+        message.setTo(toEmail);
+        message.setText(body);
+        message.setSubject(subject);
 
-            helper.setFrom("cherepnin11@gmail.com");
-            helper.setTo(to);
-            helper.setSubject(subject);
-            mimeMessage.setContent(content, "text/html");
-            mailSender.send(mimeMessage);
-            return true;
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            log.error(e.getMessage());
-            return false;
-        }
+        log.info("Send mail to - {}", toEmail);
+        mailSender.send(message);
     }
+
 }
 
 
