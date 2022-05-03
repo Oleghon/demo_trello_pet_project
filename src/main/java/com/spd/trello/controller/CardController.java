@@ -1,6 +1,5 @@
 package com.spd.trello.controller;
 
-import com.spd.trello.domain.resources.Board;
 import com.spd.trello.domain.resources.Card;
 import com.spd.trello.domain.resources.Member;
 import com.spd.trello.service.CardService;

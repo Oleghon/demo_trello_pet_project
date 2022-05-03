@@ -5,7 +5,6 @@ import com.spd.trello.security.extrafilter.wrapper.BufferedServletRequestWrapper
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -44,8 +43,7 @@ public class CustomFilter extends GenericFilterBean {
                 log.info("request has been successfully filtered");
                 chain.doFilter(wrappedRequest, response);
             } else {
-                UserContextHolder.cleanUserContext(SecurityContextHolder.getContext().getAuthentication().getName());
-                chain.doFilter(wrappedRequest, response);
+                 chain.doFilter(wrappedRequest, response);
             }
         } catch (Exception e) {
             request.setAttribute(FILTER_APPLIED, false);
