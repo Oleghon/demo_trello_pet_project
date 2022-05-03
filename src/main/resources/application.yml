@@ -45,6 +45,8 @@ spring:
           auth: true
           starttls:
             enable: true
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:

@@ -1,15 +1,21 @@
-package com.spd.trello.configuration;
+package com.spd.trello.scheduler;
 
 import com.spd.trello.service.MailService;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
+@Slf4j
+@Component
+@Scope("prototype")
 public class MailSender implements Runnable {
-    private String email;
+    private String cardName;
     private static AtomicInteger sendMails = new AtomicInteger();
-    private MailService mailSenderService;
+    private final MailService mailSenderService;
 
     public MailSender(MailService mailSenderService) {
         this.mailSenderService = mailSenderService;
@@ -17,8 +23,9 @@ public class MailSender implements Runnable {
 
     @Override
     public void run() {
-        mailSenderService.send("o.cherepnin@istu.edu.ua", "remind " + email, "Reminder has been activated");
+        mailSenderService.send("o.cherepnin@istu.edu.ua", "remind " + this.cardName, "Reminder has been activated");
         sendMails.incrementAndGet();
+        log.info(cardName + " was sent");
     }
 
     public static AtomicInteger getSendMails() {
@@ -26,6 +33,6 @@ public class MailSender implements Runnable {
     }
 
     public static void setSendMails(int count) {
-        MailSender.sendMails.set(count);
+        sendMails.set(count);
     }
 }
