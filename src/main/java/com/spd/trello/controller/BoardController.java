@@ -1,15 +1,17 @@
 package com.spd.trello.controller;
 
 import com.spd.trello.domain.resources.Board;
+import com.spd.trello.domain.resources.Member;
+import com.spd.trello.domain.resources.WorkSpace;
 import com.spd.trello.service.BoardService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
+@Slf4j
 @RestController
 @RequestMapping("/boards")
 public class BoardController extends AbstractController<Board, BoardService>{
@@ -18,8 +20,10 @@ public class BoardController extends AbstractController<Board, BoardService>{
         super(service);
     }
 
-    @GetMapping("space/{id}")
-    public List<Board> getBoardsByWorkspace(@PathVariable UUID id){
-        return service.findAllByWorkspace(id);
+    @PostMapping("/{id}/add_member")
+    public ResponseEntity<Board> addMember(@PathVariable UUID id, @RequestBody Member member){
+        Board board = service.addMember(id, member);
+        log.info("entity with id: {} has just been added to board`: {}", member.getId(), board.getId());
+        return new ResponseEntity<>(board, HttpStatus.OK);
     }
 }
