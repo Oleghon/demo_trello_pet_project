@@ -1,50 +1,26 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.Board;
-import com.spd.trello.domain.CardList;
+import com.spd.trello.domain.resources.Board;
+import com.spd.trello.domain.resources.Member;
+import com.spd.trello.repository_jpa.BoardRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-public class BoardService extends AbstractService<Board> {
-    private Scanner scanner = new Scanner(System.in);
-
-    @Override
-    public Board create(boolean addToList) {
-        Board board = new Board();
-        System.out.println("Input name of Board");
-        board.setName(scanner.nextLine());
-        System.out.println("Input description of Board:");
-        board.setDescription(scanner.nextLine());
-
-        if (addToList) {
-            System.out.println("Do you want to add cardList? Y/N");
-            if (scanner.next().equals("Y"))
-                board.setCardLists(addCardLists());
-            items.add(board);
-        }
-
-        return board;
+import java.util.UUID;
+@Slf4j
+@Service
+public class BoardService extends ArchivedResourceService<Board, BoardRepository> {
+    private MemberService memberService;
+    public BoardService(BoardRepository repository, MemberService memberService) {
+        super(repository);
+        this.memberService = memberService;
     }
 
-    private List<CardList> addCardLists() {
-        List<CardList> cardLists = new ArrayList<>();
-        CardListService cardListService = new CardListService();
-        int mark = 1;
-        while (mark == 1) {
-            cardLists.add(cardListService.create(true));
-            System.out.println("If you want to add one more cardList press '1' else press '0' ");
-            mark = scanner.nextInt();
-        }
-        return cardLists;
-    }
-
-    @Override
-    public Board update(int index, Board obj) {
-        Board boardToUpdate = items.get(index);
-        boardToUpdate.setName(obj.getName());
-        boardToUpdate.setDescription(obj.getDescription());
-        return boardToUpdate;
+    public Board addMember(UUID id, Member member) {
+        Board board = super.readById(id);
+        Member checkedMember = memberService.findByUserIdAndRole(member.getUserId(), member.getRole());
+        board.getMembers().add(checkedMember.getId());
+        log.info("member successfully added to board");
+        return super.create(board);
     }
 }

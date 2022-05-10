@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/demo_trello
+    username: postgres
+    password: '****'
+    hikari:
+      maximum-pool-size: 10
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  jpa:
+    show-sql: true
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: auto
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      ddl-auto: update
+
+  jackson:
+    serialization:
+      write_dates_as_timestamps: false
+
+  flyway:
+    enabled: false
+  profiles:
+    include:
+      - storage
+
+  main:
+    allow-bean-definition-overriding: true
+
+logging:
+  level:
+    org:
+      springframework:
+        web: info
+      hibernate: error
+    com:
+      spd:
+        trello: debug

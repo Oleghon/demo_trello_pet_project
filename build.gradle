@@ -1,8 +1,16 @@
 plugins {
     id 'java'
+    id 'jacoco'
+    id 'org.springframework.boot' version '2.6.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+
 }
 
-group 'org.example'
+jacoco {
+    version = "0.8.6"
+}
+
+group 'com.spd.trello'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -10,12 +18,35 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-    compileOnly "org.projectlombok:lombok:1.18.20"
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'commons-fileupload:commons-fileupload:1.4'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
     annotationProcessor "org.projectlombok:lombok:1.18.20"
+    compileOnly "org.projectlombok:lombok:1.18.20"
+    implementation 'org.flywaydb:flyway-core:8.2.2'
+    implementation 'org.postgresql:postgresql:42.3.1'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2:2.0.206'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
+    implementation 'junit:junit:4.13.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1'
+
 }
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
 }

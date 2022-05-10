@@ -1,30 +1,29 @@
 package com.spd.trello.service;
 
-import com.spd.trello.domain.Card;
+import com.spd.trello.domain.resources.Card;
+import com.spd.trello.domain.resources.Member;
+import com.spd.trello.repository_jpa.CardRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.UUID;
 
-public class CardService extends AbstractService<Card> {
-    private static Scanner scanner = new Scanner(System.in);
-    private List<Card> cards = new ArrayList<>();
+@Slf4j
+@Service
+public class CardService extends ArchivedResourceService<Card, CardRepository> {
 
-    @Override
-    public Card create(boolean addToList) {
-        Card card = new Card();
-        System.out.println("Input name of card:");
-        card.setName(scanner.nextLine());
-        System.out.println("Input description of card:");
-        card.setDescription(scanner.nextLine());
-        return card;
+    private MemberService memberService;
+
+    public CardService(CardRepository repository, MemberService memberService) {
+        super(repository);
+        this.memberService = memberService;
     }
 
-    @Override
-    public Card update(int index, Card obj) {
-        Card cardForUpdate = cards.get(index);
-        cardForUpdate.setName(obj.getName());
-        cardForUpdate.setDescription(obj.getDescription());
-        return cardForUpdate;
+    public Card addMember(UUID id, Member member) {
+        Card card = super.readById(id);
+        Member checkedMember = memberService.findByUserIdAndRole(member.getUserId(), member.getRole());
+        card.getAssignedMembers().add(checkedMember.getId());
+        log.info("member successfully added to card");
+        return super.create(card);
     }
 }

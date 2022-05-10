@@ -1,0 +1,4 @@
+jwt:
+  key: oleghek
+  header: Authorization
+  seconds: 604000

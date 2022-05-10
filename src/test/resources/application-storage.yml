@@ -1,0 +1,3 @@
+storage:
+  location: src/main/resources/downloads
+# location: db
